@@ -2,9 +2,13 @@ import Link from 'next/link';
 import { Receipt, Users, CheckSquare, Zap, HeartHandshake, BarChart3 } from 'lucide-react';
 import { auth } from '@/auth';
 import { LogoutButton } from '@/components/auth/LogoutButton';
+import { SettingsModal } from '@/components/SettingsModal';
+import { getSystemSettings } from '@/lib/actions/settings.actions';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  const settings = await getSystemSettings();
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
@@ -53,9 +57,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          {children}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="bg-white border-b h-14 flex items-center justify-end px-6 shadow-sm shrink-0">
+          <SettingsModal settings={settings} />
+        </header>
+        <div className="p-8 flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

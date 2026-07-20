@@ -53,9 +53,11 @@ export function PaymentModal({
   const isQuarterly = selectedCharges.length >= 3;
   const quarterlyDiscountAmount = isQuarterly ? totalBaseAmount * 0.10 : 0;
   
-  const discountPercentage = Number(customDiscount) || 0;
-  const discountValue = (discountPercentage / 100) * totalBaseAmount;
+  const discountValue = Number(customDiscount) || 0;
   const finalAmount = totalBaseAmount + totalLateFee - quarterlyDiscountAmount - discountValue;
+
+  // Warning de recargo
+  const hasLateFeeWarning = totalLateFee > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,16 +150,22 @@ export function PaymentModal({
             </div>
           </div>
 
+          {hasLateFeeWarning && (
+            <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-md text-sm">
+              <span className="font-semibold">Aviso:</span> Se aplicará 10% de recargo automáticamente por fecha de pago posterior al 5to día hábil.
+            </div>
+          )}
+
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="discount" className="text-right">Descuento Extra (%)</Label>
+            <Label htmlFor="discount" className="text-right">Descuento Extra ($)</Label>
             <Input 
               id="discount" 
               type="number" 
               min="0" 
-              max="100"
               className="col-span-3" 
               value={customDiscount}
               onChange={(e) => setCustomDiscount(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="Descuento de dirección"
             />
           </div>
 
@@ -210,7 +218,7 @@ export function PaymentModal({
             )}
             {discountValue > 0 && (
               <div className="flex justify-between text-green-600">
-                <span>Descuento Especial ({discountPercentage}%):</span>
+                <span>Descuento Especial:</span>
                 <span>-${discountValue.toFixed(2)}</span>
               </div>
             )}

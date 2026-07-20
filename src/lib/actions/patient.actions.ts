@@ -14,6 +14,7 @@ type CreatePatientInput = {
   scheduleType: string;
   agreedPrice: number;
   notes?: string;
+  sponsorId?: string | null;
 };
 
 export async function getServicePrices() {
@@ -32,6 +33,7 @@ export async function createPatient(data: CreatePatientInput) {
         fullName: data.fullName,
         category: data.category,
         notes: data.notes,
+        sponsorId: data.sponsorId,
         services: {
           create: {
             serviceId: data.serviceId,
@@ -66,6 +68,7 @@ export async function updatePatient(patientId: string, data: CreatePatientInput)
         fullName: data.fullName,
         category: data.category,
         notes: data.notes,
+        sponsorId: data.sponsorId,
       }
     });
 
@@ -107,6 +110,8 @@ export async function getPatientsWithPaymentStatus() {
   });
 
   const servicePrices = await prisma.servicePrice.findMany();
+  const settings = await prisma.systemSettings.findFirst();
+  const holidays = settings?.holidays || [];
 
   return patients.map(p => {
     // El status real de mora se determina si hay algún cargo PENDING cuya dueDate ya pasó
@@ -129,8 +134,14 @@ export async function getPatientsWithPaymentStatus() {
 
     const pendingCharges = p.charges.map(c => {
       let currentLateFee = c.lateFee;
+
+      // La dueDate del Charge *debería* estar bien calculada, pero aquí
+      // determinamos dinámicamente si tiene mora usando la logica actualizada de días hábiles.
+      // Si dueDate < now (es decir, ya pasó la fecha de pago), y no hay recargo ya guardado ni descuento manual base.
       if (c.dueDate < now && currentLateFee === 0 && !hasDirectorDiscount) {
-        currentLateFee = c.baseAmount * 0.10; // Recargo dinámico del 10%
+        // Obtenemos el porcentaje de las settings
+        const lateFeePercentage = settings?.lateFeePercentage || 0.10;
+        currentLateFee = c.baseAmount * lateFeePercentage; // Recargo dinámico
       }
       if (currentLateFee > 0) hasLateFee = true;
       totalDebt += (c.baseAmount + currentLateFee);

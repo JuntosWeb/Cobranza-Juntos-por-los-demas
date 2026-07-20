@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createPatient, updatePatient } from '@/lib/actions/patient.actions';
+import { getAllSponsors } from '@/lib/actions/sponsor-helpers.actions';
 
 type ServicePriceData = {
   id: string;
@@ -30,6 +31,7 @@ type Props = {
     serviceName: string;
     priceId: string;
     agreedPrice: number;
+    sponsorId?: string | null;
   };
   onSuccess?: () => void;
 };
@@ -37,13 +39,19 @@ type Props = {
 export function PatientForm({ groupedServices, initialData, onSuccess }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sponsors, setSponsors] = useState<{id: string, name: string, folio: string | null}[]>([]);
   
+  useEffect(() => {
+    getAllSponsors().then(setSponsors);
+  }, []);
+
   const [folio, setFolio] = useState(initialData?.folio || '');
   const [fullName, setFullName] = useState(initialData?.fullName || '');
   const [category, setCategory] = useState<'PARTICULAR' | 'FUNDACION'>(initialData?.category || 'PARTICULAR');
   const [selectedServiceName, setSelectedServiceName] = useState<string>(initialData?.serviceName || '');
   const [selectedPriceId, setSelectedPriceId] = useState<string>(initialData?.priceId || '');
   const [customPrice, setCustomPrice] = useState<number | ''>(initialData?.agreedPrice || '');
+  const [sponsorId, setSponsorId] = useState<string>(initialData?.sponsorId || 'none');
 
   const currentServiceOptions = selectedServiceName ? groupedServices[selectedServiceName] : [];
   const selectedPriceObj = currentServiceOptions?.find(p => p.id === selectedPriceId);
@@ -64,6 +72,7 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
       frequency: selectedPriceObj.frequency,
       scheduleType: selectedPriceObj.scheduleType,
       agreedPrice: finalPrice,
+      sponsorId: sponsorId !== 'none' ? sponsorId : null
     };
 
     let res;
@@ -108,6 +117,21 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
       <div className="space-y-2">
         <Label htmlFor="fullName">Nombre Completo del Paciente</Label>
         <Input id="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ej. Juan Pérez López" />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="sponsor">Padrino Asignado</Label>
+        <Select value={sponsorId} onValueChange={(v) => setSponsorId(v || 'none')}>
+          <SelectTrigger><SelectValue placeholder="Seleccionar Padrino (Opcional)" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">-- Sin Padrino --</SelectItem>
+            {sponsors.map(sp => (
+              <SelectItem key={sp.id} value={sp.id}>
+                {sp.folio ? `${sp.folio} - ` : ''}{sp.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-2 gap-4 pt-4 border-t">
