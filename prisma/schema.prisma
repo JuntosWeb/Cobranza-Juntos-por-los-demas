@@ -82,6 +82,7 @@ model SponsorPayment {
   periodCovered     String?  // Ej. JUNIO, ANUAL, MAYO-JUNIO
   cfdiUse           String?  // Uso CFDI para especie
   notes             String?  // Observaciones
+  status            String   @default("COMPLETED") // PENDING | COMPLETED | CANCELLED
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -118,6 +119,7 @@ model Charge {
   
   periodMonth      Int             // 1-12
   periodYear       Int             // Ej: 2026
+  concept          String?         // Para cargos extraordinarios (ej. Inscripción)
   baseAmount       Float           // El precio pactado en el mes generado
   lateFee          Float           @default(0) // Recargo acumulado si aplica
   dueDate          DateTime        // 5to día hábil calculado
@@ -195,4 +197,16 @@ model SystemSettings {
   daysBeforeLateFee     Int        @default(5)    // 5 días hábiles de gracia
   weeksBeforeSuspension Int        @default(4)    // 4 semanas para baja
   holidays              DateTime[] // Arreglo de fechas festivas
+}
+
+// Gastos de Caja Chica (Vales de Efectivo)
+model Expense {
+  id               String   @id @default(cuid())
+  concept          String
+  amount           Float
+  expenseDate      DateTime @default(now())
+  recordedBy       String
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

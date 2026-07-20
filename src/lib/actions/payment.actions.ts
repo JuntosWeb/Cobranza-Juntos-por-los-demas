@@ -100,7 +100,7 @@ export async function registerPayment(data: RegisterPaymentInput) {
 }
 
 export async function getPendingTransfers() {
-  return prisma.payment.findMany({
+  const patientTransfers = await prisma.payment.findMany({
     where: { status: 'PENDING', paymentMethod: 'TRANSFER' },
     include: { 
       patient: true,
@@ -110,17 +110,63 @@ export async function getPendingTransfers() {
     },
     orderBy: { createdAt: 'desc' }
   });
+
+  const sponsorTransfers = await prisma.sponsorPayment.findMany({
+    where: { status: 'PENDING', paymentMethod: 'TRANSFER' },
+    include: { sponsor: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return {
+    patientTransfers,
+    sponsorTransfers
+  };
 }
 
-export async function approveTransfer(paymentId: string) {
+export async function approveTransfer(paymentId: string, type: 'PATIENT' | 'SPONSOR') {
   try {
-    await prisma.payment.update({
-      where: { id: paymentId },
-      data: { status: 'COMPLETED' }
-    });
+    if (type === 'PATIENT') {
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: { status: 'COMPLETED' }
+      });
+    } else {
+      await prisma.sponsorPayment.update({
+        where: { id: paymentId },
+        data: { status: 'COMPLETED' }
+      });
+    }
     revalidatePath('/dashboard/conciliacion');
     return { success: true };
   } catch (error) {
     return { success: false, error: 'Error al aprobar la transferencia' };
   }
+}
+
+export async function registerExpense(concept: string, amount: number, notes: string, recordedBy: string) {
+  try {
+    await prisma.expense.create({
+      data: { concept, amount, notes, recordedBy }
+    });
+    revalidatePath('/dashboard/caja-rapida');
+    revalidatePath('/dashboard/reportes');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al registrar gasto' };
+  }
+}
+
+export async function getPaymentsForBilling() {
+  return prisma.sponsorPayment.findMany({
+    where: { 
+      OR: [
+        { cfdiUse: { not: null } },
+        { sponsor: { billingData: { not: null } } }
+      ],
+      status: 'COMPLETED'
+    },
+    include: { sponsor: true },
+    orderBy: { paymentDate: 'desc' },
+    take: 100
+  });
 }

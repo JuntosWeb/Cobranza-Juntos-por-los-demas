@@ -2,6 +2,7 @@ import { getPatientsWithPaymentStatus, getPatientsForSuspension, getServicePrice
 import { PaymentStatusBadge } from '@/components/cobranza/PaymentStatusBadge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CobrarButton } from './CobrarButton';
+import { ExtraChargeModal } from './ExtraChargeModal';
 import { RevisarBajasButton } from './RevisarBajasButton';
 import { EditPatientModal } from './EditPatientModal';
 import { auth } from '@/auth';
@@ -68,6 +69,7 @@ export default async function CobranzaPage() {
                     disabled={patient.status === 'SUSPENDED'}
                     recordedBy={session?.user?.email || 'Desconocido'}
                   />
+                  <ExtraChargeModal patientId={patient.id} patientName={patient.fullName} />
                   <EditPatientModal patient={patient} groupedServices={groupedServices} />
                 </TableCell>
               </TableRow>

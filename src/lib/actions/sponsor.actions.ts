@@ -93,3 +93,28 @@ export async function registerSponsorPayment(data: SponsorPaymentInput) {
     return { success: false, error: error.message };
   }
 }
+
+export async function getDelayedSponsors() {
+  const sponsors = await prisma.sponsor.findMany({
+    include: { sponsorPayments: { where: { status: 'COMPLETED' } } }
+  });
+  
+  const now = new Date();
+  const delayed = sponsors.map(s => {
+    const monthsSinceReg = (now.getFullYear() - s.createdAt.getFullYear()) * 12 + (now.getMonth() - s.createdAt.getMonth());
+    
+    let expected = 0;
+    if (s.periodicity === 'MENSUAL') expected = monthsSinceReg;
+    if (s.periodicity === 'TRIMESTRAL') expected = Math.floor(monthsSinceReg / 3);
+    if (s.periodicity === 'ANUAL') expected = Math.floor(monthsSinceReg / 12);
+
+    // Grace period: Si se acaban de registrar este mes, expected = 0. 
+    // Si expected es mayor que los pagos, deben.
+    const paidCount = s.sponsorPayments.length;
+    const owedPeriods = expected - paidCount;
+    
+    return { ...s, expected, paidCount, owedPeriods };
+  }).filter(s => s.owedPeriods > 0);
+
+  return delayed;
+}

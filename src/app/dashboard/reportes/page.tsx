@@ -10,19 +10,32 @@ export const dynamic = 'force-dynamic';
 const prisma = new PrismaClient();
 
 export default async function ReportesPage() {
-  // Para el MVP, obtenemos los últimos 50 pagos
+  // Para el MVP, obtenemos los últimos 50 pagos de ambos
   const payments = await prisma.payment.findMany({
     take: 50,
     orderBy: { paymentDate: 'desc' },
     include: {
       patient: true,
-      chargeAllocations: {
-        include: { charge: true }
-      }
+      chargeAllocations: { include: { charge: true } }
     }
   });
 
-  const totalIngresos = payments.reduce((acc, p) => acc + p.finalAmountPaid, 0);
+  const sponsorPayments = await prisma.sponsorPayment.findMany({
+    take: 50,
+    orderBy: { paymentDate: 'desc' },
+    include: { sponsor: true }
+  });
+
+  const allPayments = [
+    ...payments.map(p => ({ ...p, type: 'PATIENT' as const })),
+    ...sponsorPayments.map(p => ({ ...p, type: 'SPONSOR' as const, finalAmountPaid: p.amount }))
+  ].sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()).slice(0, 50);
+
+  // Calculamos ingresos EXCLUYENDO pagos EN ESPECIE (no es dinero líquido)
+  const totalIngresos = allPayments.reduce((acc, p) => {
+    if (p.paymentMethod === 'ESPECIE') return acc;
+    return acc + p.finalAmountPaid;
+  }, 0);
 
   return (
     <div className="space-y-6">
@@ -34,6 +47,12 @@ export default async function ReportesPage() {
           </Link>
           <Link href="/dashboard/reportes/bajas">
             <Button variant="outline">Ver Reporte de Bajas</Button>
+          </Link>
+          <Link href="/dashboard/reportes/padrinos-atrasados">
+            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">Ver Padrinos Atrasados</Button>
+          </Link>
+          <Link href="/dashboard/reportes/facturacion">
+            <Button variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">Recibos de Donativo</Button>
           </Link>
         </div>
       </div>
@@ -57,35 +76,43 @@ export default async function ReportesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {payments.length === 0 ? (
+            {allPayments.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-6 text-slate-500">
                   No hay pagos registrados aún.
                 </TableCell>
               </TableRow>
             ) : (
-              payments.map((payment) => (
+              allPayments.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>{format(payment.paymentDate, "d 'de' MMMM, yyyy", { locale: es })}</TableCell>
                   <TableCell>
-                    {payment.isQuickPayment ? (
+                    {payment.type === 'SPONSOR' ? (
                       <div className="flex flex-col">
-                        <span className="font-medium">Caja Rápida: {payment.quickPaymentName}</span>
-                        {payment.quickPaymentNotes && (
-                          <span className="text-xs text-slate-500">Nota: {payment.quickPaymentNotes}</span>
+                        <span className="font-medium">Padrino: {(payment as any).sponsor?.name}</span>
+                        <span className="text-xs text-slate-500">Donativo {(payment as any).periodCovered || ''}</span>
+                      </div>
+                    ) : (payment as any).isQuickPayment ? (
+                      <div className="flex flex-col">
+                        <span className="font-medium">Caja Rápida: {(payment as any).quickPaymentName}</span>
+                        {(payment as any).quickPaymentNotes && (
+                          <span className="text-xs text-slate-500">Nota: {(payment as any).quickPaymentNotes}</span>
                         )}
                       </div>
                     ) : (
                       <div className="flex flex-col">
-                        <span className="font-medium">{payment.patient?.fullName}</span>
+                        <span className="font-medium">Paciente: {(payment as any).patient?.fullName}</span>
                         <span className="text-xs text-slate-500">
-                          Cubrió {payment.chargeAllocations.length} mes(es)
+                          Cubrió {(payment as any).chargeAllocations?.length} mes(es)
                         </span>
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{payment.paymentMethod}</TableCell>
-                  <TableCell className="text-xs">{payment.recordedBy}</TableCell>
+                  <TableCell>
+                    {payment.paymentMethod}
+                    {payment.paymentMethod === 'ESPECIE' && <span className="block text-[10px] text-orange-500">(No suma al total)</span>}
+                  </TableCell>
+                  <TableCell className="text-xs">{(payment as any).recordedBy || 'Sistema'}</TableCell>
                   <TableCell className="text-right font-bold text-green-600">
                     ${payment.finalAmountPaid.toFixed(2)}
                   </TableCell>

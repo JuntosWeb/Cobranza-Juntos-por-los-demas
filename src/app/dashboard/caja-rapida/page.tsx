@@ -1,19 +1,37 @@
 import { CajaRapidaForm } from './CajaRapidaForm';
+import { CajaRapidaGastosForm } from './CajaRapidaGastosForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { auth } from '@/auth';
 
 export default async function CajaRapidaPage() {
   const session = await auth();
+  const recordedBy = session?.user?.email || 'Desconocido';
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Caja Rápida</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Caja Rápida / Vales de Efectivo</h1>
         <p className="text-slate-500 mt-2 max-w-lg mx-auto">
-          Registra ingresos misceláneos, cobros de valoraciones o pacientes de primera vez sin crear expediente.
+          Registra ingresos misceláneos o salidas de efectivo (gastos).
         </p>
       </div>
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <CajaRapidaForm recordedBy={session?.user?.email || 'Desconocido'} />
-      </div>
+      
+      <Tabs defaultValue="ingreso" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="ingreso">Registrar Ingreso (Valoración)</TabsTrigger>
+          <TabsTrigger value="gasto">Registrar Salida (Vale/Gasto)</TabsTrigger>
+        </TabsList>
+        <TabsContent value="ingreso">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <CajaRapidaForm recordedBy={recordedBy} />
+          </div>
+        </TabsContent>
+        <TabsContent value="gasto">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <CajaRapidaGastosForm recordedBy={recordedBy} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -215,3 +215,23 @@ export async function suspendPatients(patientIds: string[], reason: string = 'SU
     return { success: false, error: 'Error al suspender pacientes' };
   }
 }
+
+export async function createExtraordinaryCharge(patientId: string, concept: string, amount: number) {
+  try {
+    await prisma.charge.create({
+      data: {
+        patientId,
+        periodMonth: 0,
+        periodYear: new Date().getFullYear(),
+        concept,
+        baseAmount: amount,
+        dueDate: new Date(),
+        status: 'PENDING'
+      }
+    });
+    revalidatePath('/dashboard/cobranza');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al generar cargo' };
+  }
+}
