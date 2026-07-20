@@ -1,0 +1,173 @@
+30/6/2026, 12:37 p. m. - César Barragán: Buenas tardes Daniel!
+30/6/2026, 12:37 p. m. - César Barragán: Me pidieron que te mandara mensaje para conocer las actividades del servicio social de fortalecimiento tecnológico
+30/6/2026, 12:38 p. m. - César Barragán: Soy César Puentes
+30/6/2026, 12:39 p. m. - Daniel juntos Por Los Demás: Buenas tardes César
+30/6/2026, 12:40 p. m. - Daniel juntos Por Los Demás: Si con gusto, que carrera estás cursando?
+30/6/2026, 12:40 p. m. - César Barragán: Ingeniería en tecnologías computacionales
+30/6/2026, 1:04 p. m. - Daniel juntos Por Los Demás: A muy bien, bienvenido a juntos por los demas
+30/6/2026, 1:06 p. m. - Daniel juntos Por Los Demás: Antes de hacer el plan de trabajo, quisiera conocer si tienes experiencia automatizando procesos repetitivos en una computadora
+30/6/2026, 1:12 p. m. - César Barragán: Muchas gracias!
+30/6/2026, 1:12 p. m. - César Barragán: Tengo nociones básicas y he hecho algunas cosas escolares y personales
+30/6/2026, 7:14 p. m. - Daniel juntos Por Los Demás: Gracias por otra parte me pidió la directora citarlos un día para que conozcan la fundación
+30/6/2026, 7:14 p. m. - Daniel juntos Por Los Demás: Que día y que hora de esta semana se te acomoda?
+30/6/2026, 8:03 p. m. - César Barragán: Cualquier día y cualquier hora en realidad, únicamente si es en jueves estoy disponible después del mediodía
+1/7/2026, 11:50 a. m. - Daniel juntos Por Los Demás: Excelente
+1/7/2026, 11:50 a. m. - Daniel juntos Por Los Demás: Buenos días
+1/7/2026, 11:59 a. m. - César Barragán: Buenos días!
+2/7/2026, 4:15 p. m. - Daniel juntos Por Los Demás: Hola Cesar buenas tardes?
+2/7/2026, 4:16 p. m. - César Barragán: Hola, buenas tardes!
+2/7/2026, 4:16 p. m. - Daniel juntos Por Los Demás: De casualidad mañana tendrás disponibilidad para visitarnos?
+2/7/2026, 5:11 p. m. - César Barragán: Hola, claro que sí
+2/7/2026, 5:11 p. m. - César Barragán: En qué horario?
+2/7/2026, 5:42 p. m. - Daniel juntos Por Los Demás: Después del medio día podría ser
+2/7/2026, 5:42 p. m. - Daniel juntos Por Los Demás: Que tal 1pm?
+2/7/2026, 6:02 p. m. - Daniel juntos Por Los Demás: O si puedes a las 12 mejor
+2/7/2026, 7:13 p. m. - César Barragán: Claro, de acuerdo
+2/7/2026, 7:13 p. m. - César Barragán: Cual es la ubicación?
+2/7/2026, 7:14 p. m. - Daniel juntos Por Los Demás: Excelente
+2/7/2026, 7:15 p. m. - Daniel juntos Por Los Demás: https://maps.app.goo.gl/abYEiP8Lhf5R7DDi6
+2/7/2026, 7:15 p. m. - Daniel juntos Por Los Demás: Si tienes dudas quedo atento
+3/7/2026, 12:02 p. m. - César Barragán: Hola! Buenas tardes
+3/7/2026, 12:03 p. m. - César Barragán: Ya estoy afuera
+3/7/2026, 12:03 p. m. - César Barragán: Entro?
+3/7/2026, 1:31 p. m. - Daniel juntos Por Los Demás: Si perdón no vi tu mensaje
+3/7/2026, 5:14 p. m. - César Barragán: <Multimedia omitido>
+Propuesta_Trabajo_Fundacion_Juntos.pdf
+3/7/2026, 5:14 p. m. - César Barragán: Qué onda Daniel, cómo estás?
+
+Ya aterricé toda la información que recopilamos hoy con Laura y las demás áreas. Te hice una propuesta técnica y operativa de cómo estructuraríamos el programa para el servicio social
+
+Básicamente, la idea inicial es hacer un sistema instalable (.exe) para que sea súper rápido, seguro (los datos de los pacientes no salen a internet) y no dependa de servidores externos.
+
+Nada más tengo una duda, te parece que unifiquemos todas las actividades en un solo programa con un menú lateral (es más fácil de actualizar y más limpio para que lo usen) O prefieres que hagamos un software separado para cada actividad? Separarlos convendría únicamente si, por temas de privacidad o permisos, prefieres aislar todo para evitar que un área pueda abrir por error la pestaña de la pre-nómina de los terapeutas, para evitar eso se podría poner una contraseña para entrar a la zona de pre nomina, o compilar una versión separada sin la sección de nóminas.
+
+Te comparto el documento para que le eches un ojo y me des tu retroalimentación. Al final viene una lista de los Excels de prueba y entre otras cosas que necesitaría de ustedes para ya ponerme a hacer código y avanzar con los tiempos.
+
+Tú me dices qué opción te suena mejor y si le movemos algo al plan. Quedo al pendiente, saludos! <Se editó este mensaje.>
+3/7/2026, 6:33 p. m. - Daniel juntos Por Los Demás: Hola que tal
+3/7/2026, 6:33 p. m. - Daniel juntos Por Los Demás: Me parece bien
+3/7/2026, 6:33 p. m. - Daniel juntos Por Los Demás: Dame el lunes para juntar todo lo que necesitas
+3/7/2026, 6:52 p. m. - César Barragán: Excelente! De acuerdo
+3/7/2026, 6:52 p. m. - César Barragán: Muchas gracias
+7/7/2026, 10:35 a. m. - Daniel juntos Por Los Demás: Buenos días Cesar
+7/7/2026, 10:35 a. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+Prevista - A - PRENOMINA GENERAL.xlsx
+7/7/2026, 10:35 a. m. - Daniel juntos Por Los Demás: ‎Equino.xlsx (archivo adjunto)
+Equino.xlsx
+7/7/2026, 10:35 a. m. - Daniel juntos Por Los Demás: Anduvimos saturados ayer
+7/7/2026, 10:36 a. m. - Daniel juntos Por Los Demás: Te voy enviando los archivos por aqui va
+7/7/2026, 10:38 a. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+Versiones e Instaladores.zip
+7/7/2026, 11:02 a. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+Base de datos.zip
+7/7/2026, 11:02 a. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+Licencia.zip
+7/7/2026, 11:25 a. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+WX210PACKHFSQLCS.zip
+7/7/2026, 12:13 p. m. - Daniel juntos Por Los Demás: <Multimedia omitido>
+Tabulador 2026.xlsx
+7/7/2026, 2:35 p. m. - César Barragán: Hola Daniel que tal
+7/7/2026, 2:35 p. m. - César Barragán: Muchas gracias por enviarme los archivos
+7/7/2026, 2:48 p. m. - Daniel juntos Por Los Demás: Al contrario
+7/7/2026, 2:48 p. m. - Daniel juntos Por Los Demás: Cualquier duda quedo al pendiente
+7/7/2026, 7:14 p. m. - César Barragán: Qué onda Daniel, cómo estás? Te escribo para darte una actualización importante del proyecto y proponerte un cambio de rumbo estratégico en la arquitectura del sistema.
+
+Ya tengo avanzado el motor del programa. Los algoritmos de extracción que armé ya logran leer los calendarios de Drive y saltarse unos errores de formato que encontré del reporte de Contactae. Sin embargo, al hacer las pruebas de estrés con los datos reales, me topé con un problema operativo fuerte, el problema principal no es la tecnología, es la forma en la que se captura la información.
+
+Al cruzar los datos, noté que la persona que agenda en Drive anota los nombres de pila de los niños, pero cuando los terapeutas registran la asistencia en Contactae, por rapidez o costumbre, casi siempre le ponen "Fundación Juntos por los demás" en lugar de ligarlo al paciente real. Esto rompe cualquier automatización, porque el sistema no tiene forma matemática de adivinar a qué niño específico le dieron la terapia. Podría programar parches para intentar adivinar las coincidencias, pero siendo honestos, eso es solo tapar un proceso que está roto desde el origen, además de que seguramente existen otros problemas similares con los que aún no he dado.
+
+Dado que tengo bastante experiencia armando arquitecturas web y manejando cruces de bases de datos relacionales con el stack de tecnologías que utilizo para mis propios proyectos, quiero proponerles una solución definitiva ya que prefiero entregarles un sistema que elimine el error humano de raíz en lugar de darles un programa que dependa de Excels mal llenados. Mi propuesta es dejar de depender de Excel y Drive, y desarrollarles una plataforma web completa a la medida de la fundación.
+
+El funcionamiento de esta nueva plataforma centralizaría todo el proceso para que la información fluya sin errores.
+
+Primero, en la parte de la agenda, le diríamos adiós al documento de Drive. La persona encargada ya no escribiría texto libre en un Excel. En su lugar, agendaría las citas directamente en la plataforma seleccionando al paciente desde un catálogo estricto que jalaremos de la base de datos. Con esto eliminamos de entrada cualquier error de dedo, ortografía o uso de alias.
+
+Después, entraría el módulo de los terapeutas. Cuando un terapeuta termine su sesión, ya no se tendría que ir a Contactae a registrar asistencias genéricas. Simplemente abriría la aplicación web desde el navegador de su celular o computadora, vería su lista exacta de pacientes agendados para ese día, y solo tendría que dar un clic en un botón para confirmar si el niño asistió o faltó. 
+Finalmente, esto transformaría por completo el proceso de nómina. Como la información de entrada ya es perfecta y está homologada desde que se agenda hasta que se confirma la asistencia, la plataforma cruzaría automáticamente estos datos con los tabuladores financieros. A final de la quincena, solo se tendría que entrar a la plataforma, seleccionar el rango de fechas y descargar el reporte perfecto y calculado, sin tener que auditar nada a ojo ni cruzar documentos manualmente.
+
+Seguramente te preguntarás qué pasaría con Contactae en este nuevo modelo. Mi recomendación es que quede operando estrictamente como un expediente clínico. Le quitaríamos por completo toda la carga administrativa y de cobro. Los terapeutas lo seguirían usando única y exclusivamente para redactar sus notas médicas, las evoluciones y mantener el historial de salud de los niños seguro, la nueva plataforma web manejaría el tiempo y el dinero, y Contactae manejaría exclusivamente la salud.
+
+Es un salto tecnológico importante y requerirá que el equipo se adapte a la nueva aplicación (la cuál será muy sencilla de usar, yo me encargo de que sea muy simple su uso) pero les dejaría una infraestructura sólida que resuelve el problema de la nómina para siempre. Avísame cómo ves este enfoque. Si lo ves necesario, puedo ir a la fundación para revisarlo a detalle y que me des luz verde para arrancar con esta nueva arquitectura. Quedo al pendiente
+7/7/2026, 10:33 p. m. - César Barragán: Por cierto, es completamente viable la impresión de los tickets de caja chica, ya quedó implementado, te mando un test que hice
+7/7/2026, 10:33 p. m. - César Barragán: ‎test.pdf (archivo adjunto)
+test.pdf
+8/7/2026, 9:19 a. m. - Daniel juntos Por Los Demás: Buenos días César
+8/7/2026, 9:22 a. m. - Daniel juntos Por Los Demás: Me acabo de percatar que olvidé enviarte un Excel de parte de fundación donde viene el paciente de esas terapias que mencionas
+8/7/2026, 9:23 a. m. - Daniel juntos Por Los Demás: Gracias por tu disposición, por el tiempo creo que lo más viable es terminar este módulo no importa si no cuenta las que digan fundación en el paciente pero ya sería un gran avance por favor
+8/7/2026, 9:24 a. m. - Daniel juntos Por Los Demás: Excelente, gracias
+8/7/2026, 9:55 a. m. - César Barragán: Hola Daniel, entiendo perfecto tu preocupación por los tiempos y por qué lo dices, justo por eso te quería dar la buena noticia jaja,
+como ya tengo desarrollada una infraestructura muy robusta de agendamiento y reservas en la nube para mi propia empresa, pude reciclar casi toda la arquitectura base, de hecho, ayer me adelanté un poco, reutilicé ese código y ya tengo montado gran parte del esqueleto de la plataforma para ustedes, siendo súper transparente, me va a tomar exactamente el mismo tiempo (o hasta menos) terminarles este nuevo sistema que les automatizaría todo y supera los requerimientos originales del servicio social, que intentar parchar el script original para que salte los errores de 'Fundación', ya que encontré que no es el único error, son bastantes más y pensando a futuro, nuestra solución original es más tardada, complicada y propensa a errores, además de que obligaría a seguir haciendo trabajo manual.
+Dame la oportunidad de seguir por esta ruta, no nos vamos a retrasar, y les voy a entregar algo que sí automatiza el 100% de la nómina, te preparo un demo súper rápido en estos días para que lo veas funcionando en vivo y te convenzas, cómo ves?
+8/7/2026, 1:00 p. m. - Daniel juntos Por Los Demás: Gracias por la transparencia, justo esta de vacaciones la directora general entonces no puedo autorizar un cambio de esta magnitud, lo que puedo hacer es enviarte unas preguntas para tener más claro el panorama en el caso de que aceptemos tu nueva propuesta
+8/7/2026, 1:13 p. m. - Daniel juntos Por Los Demás: ‎NUEVA PROPUESTA DE CRM.docx (archivo adjunto)
+NUEVA PROPUESTA DE CRM.docx
+8/7/2026, 1:14 p. m. - Daniel juntos Por Los Demás: Si te sientes más cómodo podemos pausar esa parte y le seguimos con lo de caja chica o control de padrinos
+8/7/2026, 1:39 p. m. - César Barragán: También tengo contemplada la integración de procesos como control de padrinos, caja chica y otros módulos administrativos dentro de la misma plataforma, la idea es que la fundación evite tener que estar haciendo cruces y tengan todo en un solo lugar, lo cuál previene errores y les facilitaría mucho el trabajo.
+Claro que no pausamos. Al contrario, me da gusto que me mandes estas preguntas porque son exactamente los temas que vale la pena revisar antes de implementar un sistema nuevo, en un rato más te mando la respuesta a las preguntas para que tengas todo más claro, muchas gracias
+8/7/2026, 1:44 p. m. - César Barragán: En el caso de que no se apruebe esta idea y queramos volver a la idea original, está muy bien, puedo continuar con el desarrollo de los scripts que extraigan la información, pero para que pueda funcionar de manera correcta y no de problemas, nos tendríamos que hacer muy estrictos con el personal y el formato de los excel, ya no se podría escribir texto libre (usaríamos listas desplegables), estarían obligadisimos a buscar el paciente exacto en contactae (ya no podrían usar la cuenta genética de fundación), e Isa tendría que llenar columnas nuevas manualmente con los motivos de cancelación, si te soy sincero, cambiar esta cultura y obligar a todos a capturar los datos al 100% perfecto sería muy desgastante, a la primera que alguien escriba algo mal el código va a fallar y podría generar errores en contabilidad, teniendo que auditar a mano nuevamente
+8/7/2026, 1:45 p. m. - César Barragán: En un momento te mando las respuestas de las preguntas y se los dejo sobre la mesa para que tengan todo el panorama!
+8/7/2026, 1:59 p. m. - Daniel juntos Por Los Demás: Entiendo y coincido en que lo mejor sería desplegar listas, si te parece conveniente podemos ir estructurando la base de datos de padrinos ya que no existe en crm, esa es totalmente en excel
+8/7/2026, 2:05 p. m. - César Barragán: Excelente! si quieres pásame el archivo actual que tienen (o dime cómo lo manejan) y hago una propuesta de formato para dejar esa base de datos perfecta
+8/7/2026, 2:08 p. m. - Daniel juntos Por Los Demás: Son varios excels en un momento te los paso voy a salir a comer
+8/7/2026, 2:08 p. m. - Daniel juntos Por Los Demás: ‎IMG-20260708-WA0019.jpg (archivo adjunto)
+1. Pagos padrinos
+8/7/2026, 2:11 p. m. - César Barragán: Súper, cuando puedas pásamelos, no hay prisa
+8/7/2026, 2:11 p. m. - César Barragán: Provecho
+8/7/2026, 4:33 p. m. - César Barragán: ‎fundacionq&a.pdf (archivo adjunto)
+9/7/2026, 11:20 a. m. - Daniel juntos Por Los Demás: Buenos días Cesar gracias
+9/7/2026, 11:22 a. m. - Daniel juntos Por Los Demás: ‎Padrinos.xlsx (archivo adjunto)
+Padrinos.xlsx
+9/7/2026, 3:29 p. m. - César Barragán: Hola Daniel, excelente, muchas gracias
+9/7/2026, 3:40 p. m. - Daniel juntos Por Los Demás: ‎IMG-20260709-WA0027.jpg (archivo adjunto)
+Importe con número, el siguiente renglos importe con letra
+
+Concepto ahí ponemos lo que gastamos y se segmenta por área (EQUINO - natación) 
+ Fecha de cuando se ejecutó el gasto abajo y firma
+9/7/2026, 3:41 p. m. - Daniel juntos Por Los Demás: También te muestro como se están haciendo los vales de efectivo actualmente
+9/7/2026, 4:11 p. m. - César Barragán: Muy bien, te lo agradezco
+9/7/2026, 5:07 p. m. - Daniel juntos Por Los Demás: Gracias a ti
+10/7/2026, 6:34 p. m. - Daniel juntos Por Los Demás: Hola César que tal
+10/7/2026, 6:37 p. m. - Daniel juntos Por Los Demás: Estuve hablando con las áreas involucradas y tenemos una propuesta que podemos desarrollar utilizando tu infraestructura
+10/7/2026, 6:37 p. m. - Daniel juntos Por Los Demás: Y la podríamos ejecutar sin pasar por dirección general
+10/7/2026, 6:40 p. m. - Daniel juntos Por Los Demás: ‎LISTA DE PRECIOS 2026.xlsx (archivo adjunto)
+LISTA DE PRECIOS 2026.xlsx
+10/7/2026, 6:40 p. m. - Daniel juntos Por Los Demás: Para empezar debemos de tener un sistema de control de cobranza
+10/7/2026, 6:43 p. m. - Daniel juntos Por Los Demás: Si te interesa comenzar con eso podemos reemplazar lo de caja chica por esto
+10/7/2026, 6:59 p. m. - César Barragán: Hola Daniel, buenas tardes, me parece excelente, ya leí el documento que me mandaste y con eso ya tengo el material para comenzar con esta funcionalidad, muchas gracias!
+10/7/2026, 6:59 p. m. - César Barragán: Te mantengo al tanto de los avances
+10/7/2026, 7:02 p. m. - Daniel juntos Por Los Demás: Excelente
+10/7/2026, 7:03 p. m. - Daniel juntos Por Los Demás: Mañana te paso un diagrama de como se realiza este proceso que es manual
+10/7/2026, 7:04 p. m. - César Barragán: Súper, muchas gracias, sería de mucho apoyo
+13/7/2026, 12:57 p. m. - Daniel juntos Por Los Demás: Hola Cesar, buena tarde, disculpa la tardanza
+13/7/2026, 1:00 p. m. - Daniel juntos Por Los Demás: ‎IMG-20260713-WA0053.jpg (archivo adjunto)
+Te voy a pasar un ejemplo del excel final con nombres cambiados
+13/7/2026, 1:15 p. m. - Daniel juntos Por Los Demás: ‎DEMO.xlsx (archivo adjunto)
+DEMO.xlsx
+13/7/2026, 2:43 p. m. - César Barragán: hola daniel, muchas gracias, unicamente unas dudas
+
+Cuando aplican un "Descuento de Dirección", es un porcentaje fijo o la plataforma debe permitir que Atención a Clientes escriba el monto/porcentaje manualmente al momento de cobrar?
+
+Para el recargo del 10%, se calcula sobre el costo de la mensualidad base?
+
+Cómo registran actualmente las Transferencias? Contabilidad les pasa el dato y Atención a Clientes solo le da un check de aprobado en el sistema, o cómo es ese flujo?
+13/7/2026, 4:24 p. m. - Daniel juntos Por Los Demás: Así es, debe de permitir que atención a clientes escriba el porcentaje manualmente
+13/7/2026, 4:26 p. m. - Daniel juntos Por Los Demás: El recargo es individual sobre el precio que pactaron por su terapia que puede tener descuento siguiendo está lista
+13/7/2026, 4:28 p. m. - Daniel juntos Por Los Demás: Para lo del banco ese lo baja contabilidad de contpaqi y atención busca manualmente el nombre
+13/7/2026, 9:06 p. m. - César Barragán: Excelente, muchas gracias!
+14/7/2026, 9:50 p. m. - César Barragán: Hola Daniel, perdón por la hora, estoy trabajando en el control de cobranza y me surgieron unas dudas en las que no había pensado
+
+Para calcular la semana de atraso, cuál es el día límite de pago? Es un día fijo para todos (ej. los primeros 5 días del mes) o depende de la fecha en que ingresó cada niño?
+
+Si un niño tiene un Descuento de Dirección, pero se atrasa en pagar, el recargo del 10% se calcula sobre el precio normal o sobre su precio ya con descuento?
+
+Cuando el sistema da de baja a un paciente a las 4 semanas de impago, qué pasa con ese dinero que debe? Se queda registrado como deuda histórica o se cancela?
+15/7/2026, 9:56 a. m. - Daniel juntos Por Los Demás: Hola buenos días César
+15/7/2026, 9:56 a. m. - Daniel juntos Por Los Demás: Se las reenvié a atención a clientes
+15/7/2026, 9:57 a. m. - Daniel juntos Por Los Demás: ‎Juntos Por Un Caminar.vcf (archivo adjunto)
+15/7/2026, 9:57 a. m. - Daniel juntos Por Los Demás: Este es su WhatsApp se llama Isabel
+15/7/2026, 9:58 a. m. - Daniel juntos Por Los Demás: Mándale un mensaje que eres desarollador del sistema de cobranza
+15/7/2026, 9:59 a. m. - Daniel juntos Por Los Demás: Quedó atento a otra duda y gracias
+15/7/2026, 10:14 a. m. - Daniel juntos Por Los Demás: Son los primero 5 dias hábiles de cada mes
+15/7/2026, 10:14 a. m. - Daniel juntos Por Los Demás: No se le cobra de mas ningun recargo
+15/7/2026, 10:14 a. m. - Daniel juntos Por Los Demás: Se queda registrado como deuda
+15/7/2026, 7:31 p. m. - César Barragán: Hola Daniel, excelente, muchas gracias

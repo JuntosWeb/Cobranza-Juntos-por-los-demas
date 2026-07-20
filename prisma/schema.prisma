@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Para migraciones en Supabase
+}
+
+// 1. Catálogo de Servicios (Equinoterapia, Natación, etc.)
+model Service {
+  id          String         @id @default(cuid())
+  name        String         @unique // Ej: "EQUINOTERAPIA"
+  prices      ServicePrice[]
+  patients    PatientService[]
+}
+
+// 2. Catálogo de Precios (Basado en Lista de Precios 2026)
+model ServicePrice {
+  id             String   @id @default(cuid())
+  serviceId      String
+  service        Service  @relation(fields: [serviceId], references: [id])
+  frequency      Int      // Veces por semana: 1, 2 o 3
+  scheduleType   String   // Tipo de horario: "A", "B", "C"
+  monthlyPrice   Float    // Precio mensual base según la combinación
+  effectiveDate  DateTime @default(now()) // Para mantener un historial de precios
+  isActive       Boolean  @default(true) // Permite desactivar precios viejos
+}
+
+// 3. Pacientes (El núcleo operativo)
+model Patient {
+  id               String          @id @default(cuid())
+  folio            String?         @unique // Ej: "F/4962"
+  fullName         String
+  category         PatientCategory @default(PARTICULAR) // FUNDACION o PARTICULAR
+  status           PatientStatus   @default(ACTIVE)
+  
+  sponsorId        String?         // Opcional, si tiene padrino asignado
+  sponsor          Sponsor?        @relation(fields: [sponsorId], references: [id])
+
+  // Relación con los servicios que toma el paciente
+  services         PatientService[]
+  payments         Payment[]
+  charges          Charge[]        // Cargos (Estados de cuenta)
+  notes            String?         // Cajón de sastre para Recepción
+  suspensionReason String?         // Motivo de baja
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Sponsor {
+  id                 String           @id @default(cuid())
+  folio              String?          // ej. P3
+  name               String
+  monthlyCommitment  Float            @default(0)
+  billingData        String?          // Datos para recibo / factura
+  comments           String?          // Comentarios padrinos
+  birthday           DateTime?        // Fecha de cumpleaños
+  contributionMethod String?          // TRANSFERENCIA, TC, EFECTIVO
+  periodicity        String           @default("MENSUAL") // MENSUAL, TRIMESTRAL, ANUAL
+  whatsapp           String?          // WHATSAPP PADRINO
+  billingContactName String?          // NOMBRE COBRANZA
+  billingContactEmail String?         // WHATSAPP COBRANZA/CORREO
+  approxPaymentDate  String?          // ej. "QUINCENA 1"
+  patients           Patient[]        // Ahijados
+  sponsorPayments    SponsorPayment[] // Historial de cobros
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model SponsorPayment {
+  id                String   @id @default(cuid())
+  sponsorId         String
+  sponsor           Sponsor  @relation(fields: [sponsorId], references: [id])
+  amount            Float
+  commission        Float    @default(0) // Comisiones bancarias (Stripe, Fondify, etc.)
+  paymentDate       DateTime
+  paymentMethod     String   // TC, TRANSFERENCIA, ESPECIE, DEPOSITO
+  receiptNumber     String?  // Recibo de donativo
+  authorizationCode String?  // Autorización bancaria
+  periodCovered     String?  // Ej. JUNIO, ANUAL, MAYO-JUNIO
+  cfdiUse           String?  // Uso CFDI para especie
+  notes             String?  // Observaciones
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum PatientCategory {
+  FUNDACION
+  PARTICULAR
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED // Baja por falta de pago (Mantiene la deuda histórica)
+}
+
+// Relación Paciente - Servicio (Qué toma, cuántas veces y a qué hora)
+model PatientService {
+  id             String       @id @default(cuid())
+  patientId      String
+  patient        Patient      @relation(fields: [patientId], references: [id])
+  serviceId      String
+  service        Service      @relation(fields: [serviceId], references: [id])
+  frequency      Int          // 1, 2, o 3 veces
+  scheduleType   String       // "A", "B", o "C"
+  agreedPrice    Float        // Precio final pactado (Puede incluir descuento de dirección)
+  startDate      DateTime     @default(now())
+}
+
+// 4. Estado de Cuenta (Cargos)
+model Charge {
+  id               String          @id @default(cuid())
+  patientId        String
+  patient          Patient         @relation(fields: [patientId], references: [id])
+  
+  periodMonth      Int             // 1-12
+  periodYear       Int             // Ej: 2026
+  baseAmount       Float           // El precio pactado en el mes generado
+  lateFee          Float           @default(0) // Recargo acumulado si aplica
+  dueDate          DateTime        // 5to día hábil calculado
+  status           ChargeStatus    @default(PENDING)
+  
+  paymentAllocations PaymentCharge[]
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+enum ChargeStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+// 5. Transacciones y Pagos
+model Payment {
+  id                    String        @id @default(cuid())
+  patientId             String?       // Puede ser nulo para pagos rápidos (valoraciones)
+  patient               Patient?      @relation(fields: [patientId], references: [id])
+  
+  // Datos monetarios consolidados de la transacción
+  totalBaseAmount       Float         // Suma de los baseAmount de los charges o costo de valoración
+  totalLateFee          Float         @default(0) // Suma de recargos cobrados
+  quarterlyDiscount     Float         @default(0) // Descuento si pagó 3 meses (10%)
+  customDiscount        Float         @default(0) // Descuento manual de dirección
+  customDiscountReason  String?       // Obligatorio si customDiscount > 0
+  finalAmountPaid       Float         // Lo que realmente entró a caja
+  
+  // Relación N:M con Cargos
+  chargeAllocations     PaymentCharge[]
+  
+  // Datos de la transacción
+  paymentMethod         PaymentMethod
+  status                PaymentStatus @default(COMPLETED) // TRANSFERENCIA entra como PENDING
+  paymentDate           DateTime      @default(now())
+  recordedBy            String        // Usuario que registró
+  receiptNumber         String?       @unique // Folio automático para valoraciones (ej. N13247)
+  isQuickPayment        Boolean       @default(false) // Flag para identificar valoraciones
+  quickPaymentName      String?       // Nombre temporal para valoraciones sin registrar al paciente
+  quickPaymentNotes     String?       // Concepto / Comentarios de caja rápida
+  createdAt             DateTime      @default(now())
+}
+
+// Tabla Intermedia Payment <-> Charge
+model PaymentCharge {
+  id               String   @id @default(cuid())
+  paymentId        String
+  payment          Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  chargeId         String
+  charge           Charge   @relation(fields: [chargeId], references: [id], onDelete: Cascade)
+  amountAllocated  Float    // Cuánto de este pago se destinó a este cargo en particular
+  createdAt        DateTime @default(now())
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING    // Para transferencias no conciliadas
+  COMPLETED
+  CANCELLED
+}
+
+// Configuración Global del Sistema
+model SystemSettings {
+  id                    Int      @id @default(1)
+  lateFeePercentage     Float    @default(0.10) // 10%
+  quarterlyDiscount     Float    @default(0.10) // 10%
+  daysBeforeLateFee     Int      @default(5)    // 5 días hábiles de gracia
+  weeksBeforeSuspension Int      @default(4)    // 4 semanas para baja
+}

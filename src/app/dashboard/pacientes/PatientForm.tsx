@@ -1,0 +1,183 @@
+"use client";
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { createPatient, updatePatient } from '@/lib/actions/patient.actions';
+
+type ServicePriceData = {
+  id: string;
+  serviceId: string;
+  frequency: number;
+  scheduleType: string;
+  monthlyPrice: number;
+  service: {
+    id: string;
+    name: string;
+  }
+};
+
+type Props = {
+  groupedServices: Record<string, ServicePriceData[]>;
+  initialData?: {
+    id: string;
+    folio: string | null;
+    fullName: string;
+    category: 'PARTICULAR' | 'FUNDACION';
+    serviceName: string;
+    priceId: string;
+    agreedPrice: number;
+  };
+  onSuccess?: () => void;
+};
+
+export function PatientForm({ groupedServices, initialData, onSuccess }: Props) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [folio, setFolio] = useState(initialData?.folio || '');
+  const [fullName, setFullName] = useState(initialData?.fullName || '');
+  const [category, setCategory] = useState<'PARTICULAR' | 'FUNDACION'>(initialData?.category || 'PARTICULAR');
+  const [selectedServiceName, setSelectedServiceName] = useState<string>(initialData?.serviceName || '');
+  const [selectedPriceId, setSelectedPriceId] = useState<string>(initialData?.priceId || '');
+  const [customPrice, setCustomPrice] = useState<number | ''>(initialData?.agreedPrice || '');
+
+  const currentServiceOptions = selectedServiceName ? groupedServices[selectedServiceName] : [];
+  const selectedPriceObj = currentServiceOptions?.find(p => p.id === selectedPriceId);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPriceObj) return;
+
+    setIsSubmitting(true);
+    
+    const finalPrice = customPrice !== '' ? Number(customPrice) : selectedPriceObj.monthlyPrice;
+
+    const dataToSave = {
+      folio: folio.trim() || undefined,
+      fullName,
+      category,
+      serviceId: selectedPriceObj.serviceId,
+      frequency: selectedPriceObj.frequency,
+      scheduleType: selectedPriceObj.scheduleType,
+      agreedPrice: finalPrice,
+    };
+
+    let res;
+    if (initialData) {
+      res = await updatePatient(initialData.id, dataToSave);
+    } else {
+      res = await createPatient(dataToSave);
+    }
+
+    setIsSubmitting(false);
+    if (res.success) {
+      alert(initialData ? 'Paciente actualizado con éxito' : 'Paciente creado con éxito');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/dashboard/cobranza');
+      }
+    } else {
+      alert(res.error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="folio">Folio / Expediente (Opcional)</Label>
+          <Input id="folio" value={folio} onChange={(e) => setFolio(e.target.value)} placeholder="Ej. F/1234" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="category">Categoría</Label>
+          <Select value={category} onValueChange={(v) => setCategory(v as 'PARTICULAR' | 'FUNDACION')}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PARTICULAR">Particular</SelectItem>
+              <SelectItem value="FUNDACION">Fundación</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Nombre Completo del Paciente</Label>
+        <Input id="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ej. Juan Pérez López" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+        <div className="space-y-2">
+          <Label>Servicio a Inscribir</Label>
+          <Select 
+            value={selectedServiceName} 
+            onValueChange={(v) => { 
+              setSelectedServiceName(v as string);
+              setSelectedPriceId('');
+              setCustomPrice('');
+            }}
+          >
+            <SelectTrigger><SelectValue placeholder="Selecciona Servicio" /></SelectTrigger>
+            <SelectContent>
+              {Object.keys(groupedServices).map(name => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label>Frecuencia y Horario</Label>
+          <Select 
+            value={selectedPriceId} 
+            onValueChange={(v) => {
+              setSelectedPriceId(v as string);
+              setCustomPrice('');
+            }}
+            disabled={!selectedServiceName}
+          >
+            <SelectTrigger><SelectValue placeholder="Selecciona modalidad" /></SelectTrigger>
+            <SelectContent>
+              {currentServiceOptions?.map(sp => (
+                <SelectItem key={sp.id} value={sp.id}>
+                  {sp.frequency}x sem - Horario {sp.scheduleType} (${sp.monthlyPrice})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {selectedPriceObj && (
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded-md space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-blue-900">Tarifa Base Sugerida:</span>
+            <span className="text-xl font-bold text-blue-900">${selectedPriceObj.monthlyPrice}</span>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="customPrice" className="text-blue-800">Precio Especial Pactado (solo si aplica descuento de dirección)</Label>
+            <Input 
+              id="customPrice"
+              type="number"
+              min="0"
+              placeholder={`Dejar en blanco para usar $${selectedPriceObj.monthlyPrice}`}
+              value={customPrice}
+              onChange={(e) => setCustomPrice(e.target.value === '' ? '' : Number(e.target.value))}
+            />
+            <p className="text-xs text-blue-600">
+              El precio que dejes aquí será la base para todos los cobros mensuales futuros.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Button type="submit" className="w-full" disabled={isSubmitting || !selectedPriceId}>
+        {isSubmitting ? (initialData ? 'Actualizando...' : 'Registrando...') : (initialData ? 'Guardar Cambios' : 'Registrar Paciente')}
+      </Button>
+    </form>
+  );
+}
