@@ -35,18 +35,30 @@ type SponsorInput = {
   billingContactName?: string;
   billingContactEmail?: string;
   approxPaymentDate?: string;
+  patientIds?: string[];
 };
 
 export async function upsertSponsor(data: SponsorInput) {
   try {
+    const { patientIds, ...sponsorData } = data;
     if (data.id) {
       await prisma.sponsor.update({
         where: { id: data.id },
-        data
+        data: {
+          ...sponsorData,
+          patients: {
+            set: patientIds?.map(id => ({ id })) || []
+          }
+        }
       });
     } else {
       await prisma.sponsor.create({
-        data
+        data: {
+          ...sponsorData,
+          patients: {
+            connect: patientIds?.map(id => ({ id })) || []
+          }
+        }
       });
     }
     revalidatePath('/dashboard/padrinos');

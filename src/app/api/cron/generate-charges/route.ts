@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getBusinessDays } from '@/lib/utils/financial-rules';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,9 @@ export async function GET(request: Request) {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
+
+    const settings = await prisma.systemSettings.findFirst();
+    const holidays = settings?.holidays || [];
 
     // 1. Obtener pacientes ACTIVOS con sus servicios
     const activePatients = await prisma.patient.findMany({
@@ -41,8 +45,8 @@ export async function GET(request: Request) {
 
       // 3. Si no existe, lo creamos
       if (!existingCharge) {
-        // La fecha de vencimiento es el día 7 del mes actual (según regla de 5 días hábiles aprox)
-        const dueDate = new Date(currentYear, currentMonth - 1, 7);
+        // La fecha de vencimiento es dinámicamente el 5to día hábil del mes actual
+        const dueDate = getBusinessDays(new Date(currentYear, currentMonth - 1, 1), holidays);
         
         await prisma.charge.create({
           data: {

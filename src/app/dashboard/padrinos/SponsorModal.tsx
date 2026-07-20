@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { upsertSponsor } from '@/lib/actions/sponsor.actions';
+import { getAllActivePatients } from '@/lib/actions/patient-helpers.actions';
+import ReactSelect from 'react-select';
 
 type Props = {
   isOpen: boolean;
@@ -16,6 +18,25 @@ type Props = {
 
 export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [patientsOptions, setPatientsOptions] = useState<{value: string, label: string}[]>([]);
+  const [selectedPatients, setSelectedPatients] = useState<{value: string, label: string}[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const pts = await getAllActivePatients();
+      setPatientsOptions(pts.map(p => ({
+        value: p.id,
+        label: p.folio ? `${p.folio} - ${p.fullName}` : p.fullName
+      })));
+    }
+    load();
+    if (sponsor?.patients) {
+      setSelectedPatients(sponsor.patients.map((p: any) => ({
+        value: p.id,
+        label: p.folio ? `${p.folio} - ${p.fullName}` : p.fullName
+      })));
+    }
+  }, [sponsor]);
   
   const [formData, setFormData] = useState({
     folio: sponsor?.folio || '',
@@ -46,7 +67,8 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
       billingContactEmail: formData.billingContactEmail,
       approxPaymentDate: formData.approxPaymentDate,
       comments: formData.comments,
-      birthday: formData.birthday ? new Date(formData.birthday) : undefined
+      birthday: formData.birthday ? new Date(formData.birthday) : undefined,
+      patientIds: selectedPatients.map(p => p.value)
     });
     setIsSubmitting(false);
     if (res.success) {
@@ -167,6 +189,22 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
               value={formData.comments} 
               onChange={e => setFormData({ ...formData, comments: e.target.value })}
               placeholder="VIP, mandar correo, etc."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ahijados (Pacientes)</Label>
+            <ReactSelect
+              isMulti
+              options={patientsOptions}
+              value={selectedPatients}
+              onChange={(v) => setSelectedPatients(v as any)}
+              placeholder="Buscar y seleccionar pacientes..."
+              className="text-sm"
+              styles={{
+                menuPortal: base => ({ ...base, zIndex: 9999 })
+              }}
+              menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
             />
           </div>
 

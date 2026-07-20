@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +28,14 @@ export default async function ReportesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Reporte de Ingresos</h1>
+        <div className="flex gap-4">
+          <Link href="/dashboard/reportes/valoraciones">
+            <Button variant="outline">Ver Valoraciones Médicas</Button>
+          </Link>
+          <Link href="/dashboard/reportes/bajas">
+            <Button variant="outline">Ver Reporte de Bajas</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

@@ -70,12 +70,12 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Comisión (Stripe, etc.)</Label>
+              <Label>Mes(es) que cubre</Label>
               <Input 
-                type="number"
-                min="0"
-                value={formData.commission} 
-                onChange={e => setFormData({ ...formData, commission: e.target.value })}
+                required
+                value={formData.periodCovered}
+                onChange={e => setFormData({ ...formData, periodCovered: e.target.value })}
+                placeholder="Ej. JUNIO"
               />
             </div>
           </div>
@@ -93,15 +93,18 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Mes(es) que cubre</Label>
-              <Input 
-                required
-                value={formData.periodCovered} 
-                onChange={e => setFormData({ ...formData, periodCovered: e.target.value })}
-                placeholder="Ej. JUNIO"
-              />
-            </div>
+            {(formData.paymentMethod === 'TC' || formData.paymentMethod === 'TRANSFER') && (
+              <div className="space-y-2">
+                <Label>Comisión (Stripe, Banco, etc.)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={formData.commission}
+                  onChange={e => setFormData({ ...formData, commission: e.target.value })}
+                  placeholder="Ej. 50.00"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
