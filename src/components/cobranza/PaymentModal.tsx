@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { registerPayment } from '@/lib/actions/payment.actions';
+import { cancelCharge } from '@/lib/actions/patient.actions';
 import { PaymentMethod, Charge } from '@prisma/client';
+import { Trash2 } from 'lucide-react';
 
 type PendingCharge = Charge & { calculatedLateFee: number };
 
@@ -35,6 +37,7 @@ export function PaymentModal({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successPaymentId, setSuccessPaymentId] = useState<string | null>(null);
+  const [cancellingChargeId, setCancellingChargeId] = useState<string | null>(null);
 
   const handleToggleCharge = (id: string, checked: boolean) => {
     if (checked) {
@@ -91,6 +94,20 @@ export function PaymentModal({
     }
   };
 
+  const handleCancelCharge = async (chargeId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este cargo extraordinario?')) return;
+    setCancellingChargeId(chargeId);
+    const res = await cancelCharge(chargeId);
+    setCancellingChargeId(null);
+    if (res.success) {
+      // The parent component should ideally reload the charges, but closing the modal 
+      // and letting the page revalidate works too for this MVP.
+      onClose();
+    } else {
+      alert(res.error);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {
@@ -144,6 +161,19 @@ export function PaymentModal({
                         <span className="ml-2 text-xs text-orange-600">(+${c.calculatedLateFee} mora)</span>
                       )}
                     </label>
+                    {c.periodMonth === 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                        onClick={() => handleCancelCharge(c.id)}
+                        disabled={cancellingChargeId === c.id}
+                        title="Eliminar cargo extra"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 ))
               )}
@@ -186,7 +216,15 @@ export function PaymentModal({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Método</Label>
             <div className="col-span-3">
-              <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+              <Select 
+                value={paymentMethod} 
+                onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
+                items={{
+                  CASH: 'Efectivo',
+                  CARD: 'Tarjeta',
+                  TRANSFER: 'Transferencia'
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar método" />
                 </SelectTrigger>

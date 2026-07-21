@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -20,9 +20,9 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${nunito.variable} h-full antialiased`}
+      className={`${outfit.variable} h-full antialiased font-outfit`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col font-outfit">{children}</body>
     </html>
   );
 }

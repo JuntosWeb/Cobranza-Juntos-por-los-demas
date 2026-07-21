@@ -8,6 +8,17 @@ datasource db {
   directUrl = env("DIRECT_URL") // Para migraciones en Supabase
 }
 
+// Usuarios del sistema
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  passwordHash String
+  role         String   @default("STAFF") // ADMIN | STAFF
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
 // 1. Catálogo de Servicios (Equinoterapia, Natación, etc.)
 model Service {
   id          String         @id @default(cuid())
@@ -33,7 +44,7 @@ model Patient {
   id               String          @id @default(cuid())
   folio            String?         @unique // Ej: "F/4962"
   fullName         String
-  category         PatientCategory @default(PARTICULAR) // FUNDACION o PARTICULAR
+  category         String          @default("PARTICULAR") // Dynamic category
   status           PatientStatus   @default(ACTIVE)
   
   sponsorId        String?         // Opcional, si tiene padrino asignado
@@ -87,10 +98,7 @@ model SponsorPayment {
   updatedAt         DateTime @updatedAt
 }
 
-enum PatientCategory {
-  FUNDACION
-  PARTICULAR
-}
+
 
 enum PatientStatus {
   ACTIVE
@@ -191,12 +199,16 @@ enum PaymentStatus {
 
 // Configuración Global del Sistema
 model SystemSettings {
-  id                    Int        @id @default(1)
-  lateFeePercentage     Float      @default(0.10) // 10%
-  quarterlyDiscount     Float      @default(0.10) // 10%
-  daysBeforeLateFee     Int        @default(5)    // 5 días hábiles de gracia
-  weeksBeforeSuspension Int        @default(4)    // 4 semanas para baja
-  holidays              DateTime[] // Arreglo de fechas festivas
+  id                           Int        @id @default(1)
+  lateFeePercentage            Float      @default(0.10) // 10%
+  quarterlyDiscount            Float      @default(0.10) // 10%
+  daysBeforeLateFee            Int        @default(5)    // 5 das hǭbiles de gracia
+  weeksBeforeSuspension        Int        @default(4)    // 4 semanas para baja
+  holidays                     DateTime[] // Arreglo de fechas festivas
+  inscriptionFee               Float      @default(1700)
+  patientCategories            String[]   @default(["FUNDACION", "PARTICULAR"])
+  scheduleTypes                String[]   @default(["A", "B", "C"])
+  exemptDiscountedFromLateFees Boolean    @default(true)
 }
 
 // Gastos de Caja Chica (Vales de Efectivo)

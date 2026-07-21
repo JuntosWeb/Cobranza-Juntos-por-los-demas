@@ -71,19 +71,42 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
             </div>
             <div className="space-y-2">
               <Label>Mes(es) que cubre</Label>
-              <Input 
-                required
-                value={formData.periodCovered}
-                onChange={e => setFormData({ ...formData, periodCovered: e.target.value })}
-                placeholder="Ej. JUNIO"
-              />
+              <Select 
+                value={formData.periodCovered} 
+                onValueChange={v => setFormData({ ...formData, periodCovered: v as string })}
+              >
+                <SelectTrigger><SelectValue placeholder="Seleccionar Mes" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ENERO">Enero</SelectItem>
+                  <SelectItem value="FEBRERO">Febrero</SelectItem>
+                  <SelectItem value="MARZO">Marzo</SelectItem>
+                  <SelectItem value="ABRIL">Abril</SelectItem>
+                  <SelectItem value="MAYO">Mayo</SelectItem>
+                  <SelectItem value="JUNIO">Junio</SelectItem>
+                  <SelectItem value="JULIO">Julio</SelectItem>
+                  <SelectItem value="AGOSTO">Agosto</SelectItem>
+                  <SelectItem value="SEPTIEMBRE">Septiembre</SelectItem>
+                  <SelectItem value="OCTUBRE">Octubre</SelectItem>
+                  <SelectItem value="NOVIEMBRE">Noviembre</SelectItem>
+                  <SelectItem value="DICIEMBRE">Diciembre</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Método de Pago</Label>
-              <Select value={formData.paymentMethod} onValueChange={v => setFormData({ ...formData, paymentMethod: v as string })}>
+              <Select 
+                  value={formData.paymentMethod} 
+                  onValueChange={v => setFormData({ ...formData, paymentMethod: v as string })}
+                  items={{
+                    TRANSFER: 'Transferencia',
+                    TC: 'Tarjeta / Plataforma',
+                    DEPOSITO: 'Depósito',
+                    ESPECIE: 'Especie'
+                  }}
+                >
                 <SelectTrigger><SelectValue/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TRANSFER">Transferencia</SelectItem>
@@ -98,6 +121,7 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
                 <Label>Comisión (Stripe, Banco, etc.)</Label>
                 <Input
                   type="number"
+                  step="0.01"
                   min="0"
                   value={formData.commission}
                   onChange={e => setFormData({ ...formData, commission: e.target.value })}

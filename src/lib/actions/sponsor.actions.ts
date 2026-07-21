@@ -1,9 +1,9 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-const prisma = new PrismaClient();
+
 
 export async function getSponsors() {
   return prisma.sponsor.findMany({
@@ -94,6 +94,20 @@ export async function registerSponsorPayment(data: SponsorPaymentInput) {
   }
 }
 
+export async function cancelSponsorPayment(paymentId: string) {
+  try {
+    await prisma.sponsorPayment.update({
+      where: { id: paymentId },
+      data: { status: 'CANCELLED' }
+    });
+    revalidatePath('/dashboard/padrinos');
+    revalidatePath('/dashboard/reportes');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: 'Error al anular el pago del padrino' };
+  }
+}
+
 export async function getDelayedSponsors() {
   const sponsors = await prisma.sponsor.findMany({
     include: { sponsorPayments: { where: { status: 'COMPLETED' } } }
@@ -104,16 +118,32 @@ export async function getDelayedSponsors() {
     const monthsSinceReg = (now.getFullYear() - s.createdAt.getFullYear()) * 12 + (now.getMonth() - s.createdAt.getMonth());
     
     let expected = 0;
-    if (s.periodicity === 'MENSUAL') expected = monthsSinceReg;
-    if (s.periodicity === 'TRIMESTRAL') expected = Math.floor(monthsSinceReg / 3);
-    if (s.periodicity === 'ANUAL') expected = Math.floor(monthsSinceReg / 12);
+    let periodCost = s.monthlyCommitment;
 
-    // Grace period: Si se acaban de registrar este mes, expected = 0. 
-    // Si expected es mayor que los pagos, deben.
-    const paidCount = s.sponsorPayments.length;
+    if (s.periodicity === 'MENSUAL') {
+      expected = monthsSinceReg;
+      periodCost = s.monthlyCommitment;
+    } else if (s.periodicity === 'TRIMESTRAL') {
+      expected = Math.floor(monthsSinceReg / 3);
+      periodCost = s.monthlyCommitment * 3;
+    } else if (s.periodicity === 'SEMESTRAL') {
+      expected = Math.floor(monthsSinceReg / 6);
+      periodCost = s.monthlyCommitment * 6;
+    } else if (s.periodicity === 'ANUAL') {
+      expected = Math.floor(monthsSinceReg / 12);
+      periodCost = s.monthlyCommitment * 12;
+    }
+
+    if (periodCost <= 0) {
+      return { ...s, expected: 0, paidCount: 0, owedPeriods: 0, debtAmount: 0, periodCost: 0 };
+    }
+
+    const totalPaid = s.sponsorPayments.reduce((sum, p) => sum + p.amount, 0);
+    const paidCount = Math.floor(totalPaid / periodCost);
     const owedPeriods = expected - paidCount;
+    const debtAmount = owedPeriods * periodCost;
     
-    return { ...s, expected, paidCount, owedPeriods };
+    return { ...s, expected, paidCount, owedPeriods, debtAmount, periodCost };
   }).filter(s => s.owedPeriods > 0);
 
   return delayed;

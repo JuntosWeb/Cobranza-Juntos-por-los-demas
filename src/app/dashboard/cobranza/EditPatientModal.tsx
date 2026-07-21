@@ -16,29 +16,32 @@ type ServicePriceData = {
 };
 
 type Props = {
-  patient: any; // The patient object from the table
-  groupedServices: Record<string, ServicePriceData[]>;
+  patient: any; // Type from getPatientsWithPaymentStatus
+  groupedServices: any;
+  patientCategories?: string[];
 };
 
-export function EditPatientModal({ patient, groupedServices }: Props) {
-  const [open, setOpen] = useState(false);
+export function EditPatientModal({ patient, groupedServices, patientCategories }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
 
   // Find the exact priceId based on the patient's current service
   const currentServiceGroup = groupedServices[patient.serviceName] || [];
-  const currentPriceObj = currentServiceGroup.find(p => p.frequency === patient.frequency && p.scheduleType === patient.scheduleType);
+  const currentPriceObj = currentServiceGroup.find((p: any) => p.frequency === patient.frequency && p.scheduleType === patient.scheduleType);
 
   const initialData = {
     id: patient.id,
     folio: patient.folio,
     fullName: patient.fullName,
-    category: patient.category as 'PARTICULAR' | 'FUNDACION',
+    category: patient.category,
     serviceName: patient.serviceName,
     priceId: currentPriceObj?.id || '',
-    agreedPrice: patient.baseAmount
+    agreedPrice: patient.baseAmount,
+    status: patient.status,
+    suspensionReason: patient.suspensionReason
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger 
         render={
           <Button variant="outline" size="sm" className="ml-2">
@@ -50,11 +53,14 @@ export function EditPatientModal({ patient, groupedServices }: Props) {
         <DialogHeader>
           <DialogTitle>Editar Paciente</DialogTitle>
         </DialogHeader>
-        <PatientForm 
-          groupedServices={groupedServices} 
-          initialData={initialData} 
-          onSuccess={() => setOpen(false)}
-        />
+        <div className="mt-4">
+          <PatientForm 
+            groupedServices={groupedServices} 
+            patientCategories={patientCategories}
+            initialData={initialData} 
+            onSuccess={() => setIsOpen(false)}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

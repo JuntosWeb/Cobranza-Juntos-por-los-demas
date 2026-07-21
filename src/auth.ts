@@ -1,5 +1,8 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcrypt'
+
 
 export const {
   handlers: { GET, POST },
@@ -15,14 +18,22 @@ export const {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Mock authentication para el MVP (Admin y Staff)
-        if (credentials?.username === "admin" && credentials?.password === "admin123") {
-          return { id: "1", name: "Admin Fundación", email: "admin@juntosporlosdemas.org", role: "ADMIN" }
-        }
-        if (credentials?.username === "staff" && credentials?.password === "staff123") {
-          return { id: "2", name: "Staff Recepción", email: "staff@juntosporlosdemas.org", role: "STAFF" }
-        }
-        return null
+        if (!credentials?.username || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { username: credentials.username as string }
+        });
+
+        if (!user || !user.isActive) return null;
+
+        const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
+        if (!isValid) return null;
+
+        return { 
+          id: user.id, 
+          name: user.name, 
+          role: user.role 
+        };
       }
     })
   ],

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function PadrinosAtrasadosPage() {
   const delayedSponsors = await getDelayedSponsors();
 
-  const totalOwed = delayedSponsors.reduce((acc, s) => acc + (s.owedPeriods * s.monthlyCommitment), 0);
+  const totalOwed = delayedSponsors.reduce((acc, s) => acc + s.debtAmount, 0);
 
   return (
     <div className="space-y-6">
@@ -62,7 +62,7 @@ export default async function PadrinosAtrasadosPage() {
                   <TableCell>{format(new Date(s.createdAt), "MMM yyyy", { locale: es })}</TableCell>
                   <TableCell className="text-center">
                     <Badge variant="destructive" className="text-xs">
-                      Debe {s.owedPeriods} periodo(s)
+                      Debe {s.owedPeriods} periodo(s) (${s.debtAmount.toFixed(2)})
                     </Badge>
                   </TableCell>
                 </TableRow>

@@ -85,7 +85,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
           <DialogTitle>{sponsor ? 'Editar Padrino' : 'Nuevo Padrino'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Folio Padrino</Label>
               <Input 
@@ -104,7 +104,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Aportación ($ Mensual)</Label>
               <Input 
@@ -117,7 +117,16 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
             </div>
             <div className="space-y-2">
               <Label>Periodicidad</Label>
-              <Select value={formData.periodicity} onValueChange={v => setFormData({ ...formData, periodicity: v as string })}>
+              <Select 
+                value={formData.periodicity} 
+                onValueChange={v => setFormData({ ...formData, periodicity: v as string })}
+                items={{
+                  MENSUAL: 'Mensual',
+                  TRIMESTRAL: 'Trimestral',
+                  SEMESTRAL: 'Semestral',
+                  ANUAL: 'Anual'
+                }}
+              >
                 <SelectTrigger><SelectValue/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="MENSUAL">Mensual</SelectItem>
@@ -129,7 +138,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>WhatsApp Padrino</Label>
               <Input 
@@ -146,7 +155,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>WhatsApp/Correo Cobranza</Label>
               <Input 
@@ -164,7 +173,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Fecha Aprox. Pago</Label>
               <Input 

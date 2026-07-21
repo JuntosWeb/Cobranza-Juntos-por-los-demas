@@ -1,10 +1,14 @@
 import { getServicePrices } from '@/lib/actions/patient.actions';
+import { getSystemSettings } from '@/lib/actions/settings.actions';
 import { PatientForm } from './PatientForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PacientesPage() {
-  const servicePrices = await getServicePrices();
+  const [servicePrices, settings] = await Promise.all([
+    getServicePrices(),
+    getSystemSettings()
+  ]);
 
   // Agrupamos por servicio para el frontend
   const groupedServices = servicePrices.reduce((acc, curr) => {
@@ -24,7 +28,7 @@ export default async function PacientesPage() {
       </div>
       
       <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-blue-900/5 p-8">
-        <PatientForm groupedServices={groupedServices} />
+        <PatientForm groupedServices={groupedServices} patientCategories={settings?.patientCategories || ['PARTICULAR', 'FUNDACION']} />
       </div>
     </div>
   );

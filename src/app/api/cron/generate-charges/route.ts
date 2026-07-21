@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { getBusinessDays } from '@/lib/utils/financial-rules';
 
-const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   // Protegemos la ruta para que solo pueda ser llamada con un secreto o por Vercel Cron
@@ -13,9 +14,12 @@ export async function GET(request: Request) {
 
   try {
     console.log('🔄 Iniciando generación automática de cargos mensuales...');
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
+    
+    // Ajustar a la zona horaria de México para evitar errores por diferencias con UTC
+    const mxDateString = new Date().toLocaleString("en-US", { timeZone: "America/Mexico_City" });
+    const mxDate = new Date(mxDateString);
+    const currentMonth = mxDate.getMonth() + 1;
+    const currentYear = mxDate.getFullYear();
 
     const settings = await prisma.systemSettings.findFirst();
     const holidays = settings?.holidays || [];
@@ -45,8 +49,9 @@ export async function GET(request: Request) {
 
       // 3. Si no existe, lo creamos
       if (!existingCharge) {
-        // La fecha de vencimiento es dinámicamente el 5to día hábil del mes actual
-        const dueDate = getBusinessDays(new Date(currentYear, currentMonth - 1, 1), holidays);
+        // La fecha de vencimiento es dinámicamente el día hábil configurado del mes actual
+        const limitDays = settings?.daysBeforeLateFee || 5;
+        const dueDate = getBusinessDays(new Date(currentYear, currentMonth - 1, 1), holidays, limitDays);
         
         await prisma.charge.create({
           data: {

@@ -1,13 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ChevronDown, FileText, UserX, AlertTriangle, Receipt, Stethoscope } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-const prisma = new PrismaClient();
+
 
 export default async function ReportesPage() {
   // Para el MVP, obtenemos los últimos 50 pagos de ambos
@@ -39,9 +41,54 @@ export default async function ReportesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Reporte de Ingresos</h1>
-        <div className="flex gap-4">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 gap-4 xl:gap-0">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">Reporte de Ingresos</h1>
+        
+        {/* Mobile / Tablet View: Dropdown Menu */}
+        <div className="xl:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="outline" className="w-full sm:w-auto font-semibold shadow-sm" />}>
+              <FileText className="w-4 h-4 mr-2" />
+              Más Reportes
+              <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 font-outfit">
+              <Link href="/dashboard/reportes/valoraciones">
+                <DropdownMenuItem className="cursor-pointer">
+                  <Stethoscope className="w-4 h-4 mr-2" />
+                  Valoraciones Médicas
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/dashboard/reportes/bajas">
+                <DropdownMenuItem className="cursor-pointer">
+                  <UserX className="w-4 h-4 mr-2" />
+                  Reporte de Bajas
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/dashboard/reportes/padrinos-atrasados">
+                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Padrinos Atrasados
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/dashboard/reportes/facturacion">
+                <DropdownMenuItem className="cursor-pointer text-blue-600 focus:text-blue-600 focus:bg-blue-50">
+                  <Receipt className="w-4 h-4 mr-2" />
+                  Recibos de Donativo
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/dashboard/reportes/auditoria">
+                <DropdownMenuItem className="cursor-pointer text-emerald-700 focus:text-emerald-700 focus:bg-emerald-50">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Auditoría
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Desktop View: Full Buttons */}
+        <div className="hidden xl:flex gap-4">
           <Link href="/dashboard/reportes/valoraciones">
             <Button variant="outline">Ver Valoraciones Médicas</Button>
           </Link>
@@ -54,6 +101,9 @@ export default async function ReportesPage() {
           <Link href="/dashboard/reportes/facturacion">
             <Button variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">Recibos de Donativo</Button>
           </Link>
+          <Link href="/dashboard/reportes/auditoria">
+            <Button variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50">Auditoría (Particulares)</Button>
+          </Link>
         </div>
       </div>
 
@@ -64,8 +114,8 @@ export default async function ReportesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-blue-900/5 overflow-hidden">
-        <Table>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-blue-900/5 overflow-x-auto">
+        <Table className="min-w-[800px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>

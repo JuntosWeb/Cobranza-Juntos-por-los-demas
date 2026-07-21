@@ -1,9 +1,10 @@
 "use server";
 
-import { PrismaClient, PaymentMethod } from '@prisma/client';
+import { PaymentMethod } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-const prisma = new PrismaClient();
+
 
 type RegisterPaymentInput = {
   patientId?: string;
@@ -49,6 +50,10 @@ export async function registerPayment(data: RegisterPaymentInput) {
       return { success: false, error: 'Datos incompletos para procesar el pago' };
     }
 
+    if (data.finalAmountPaid < 0 || isNaN(data.finalAmountPaid)) {
+      return { success: false, error: 'El monto de pago es inválido.' };
+    }
+
     // Creamos la transacción del pago, relacionando con PaymentCharge y actualizando los Charges a PAID
     const newPayment = await prisma.$transaction(async (tx) => {
       // 1. Crear el registro de Payment
@@ -69,12 +74,19 @@ export async function registerPayment(data: RegisterPaymentInput) {
 
       // 2. Crear las relaciones en PaymentCharge y actualizar los Charges a PAID
       for (const chargeId of data.chargeIds!) {
-        // En un MVP asumimos que el cargo se liquida completo.
-        // Si quisiéramos pagos parciales, habría que calcular cuánto de amountAllocated se va a cada charge
-        // y si el Charge queda PAID o PENDING (con adeudo restante). Para mantenerlo simple, lo liquidamos.
-        const charge = await tx.charge.update({
-          where: { id: chargeId },
+        // Actualización ATÓMICA para prevenir Race Conditions (Doble Cobro)
+        const updateResult = await tx.charge.updateMany({
+          where: { id: chargeId, status: 'PENDING' },
           data: { status: 'PAID' }
+        });
+
+        if (updateResult.count === 0) {
+          throw new Error('El cargo ya fue pagado en otra sesión. Transacción abortada para prevenir cobro doble.');
+        }
+
+        // Recuperamos el cargo para extraer sus montos
+        const charge = await tx.charge.findUniqueOrThrow({
+          where: { id: chargeId }
         });
 
         await tx.paymentCharge.create({
@@ -143,6 +155,38 @@ export async function approveTransfer(paymentId: string, type: 'PATIENT' | 'SPON
   }
 }
 
+export async function rejectTransfer(paymentId: string, type: 'PATIENT' | 'SPONSOR') {
+  try {
+    if (type === 'PATIENT') {
+      await prisma.$transaction(async (tx) => {
+        const payment = await tx.payment.update({
+          where: { id: paymentId },
+          data: { status: 'CANCELLED' },
+          include: { chargeAllocations: true }
+        });
+
+        const chargeIds = payment.chargeAllocations.map(ca => ca.chargeId);
+        
+        if (chargeIds.length > 0) {
+          await tx.charge.updateMany({
+            where: { id: { in: chargeIds } },
+            data: { status: 'PENDING' }
+          });
+        }
+      });
+    } else {
+      await prisma.sponsorPayment.update({
+        where: { id: paymentId },
+        data: { status: 'CANCELLED' }
+      });
+    }
+    revalidatePath('/dashboard/conciliacion');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al rechazar la transferencia' };
+  }
+}
+
 export async function registerExpense(concept: string, amount: number, notes: string, recordedBy: string) {
   try {
     await prisma.expense.create({
@@ -153,6 +197,19 @@ export async function registerExpense(concept: string, amount: number, notes: st
     return { success: true };
   } catch (error) {
     return { success: false, error: 'Error al registrar gasto' };
+  }
+}
+
+export async function cancelExpense(expenseId: string) {
+  try {
+    await prisma.expense.delete({
+      where: { id: expenseId }
+    });
+    revalidatePath('/dashboard/caja-rapida');
+    revalidatePath('/dashboard/reportes');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al cancelar gasto' };
   }
 }
 
@@ -168,5 +225,18 @@ export async function getPaymentsForBilling() {
     include: { sponsor: true },
     orderBy: { paymentDate: 'desc' },
     take: 100
+  });
+}
+
+export async function getPatientRecentPayments(patientId: string) {
+  return prisma.payment.findMany({
+    where: { patientId, status: { in: ['COMPLETED', 'PENDING'] } },
+    include: {
+      chargeAllocations: {
+        include: { charge: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 5
   });
 }

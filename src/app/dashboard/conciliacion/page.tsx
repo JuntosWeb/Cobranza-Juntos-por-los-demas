@@ -1,6 +1,6 @@
 import { getPendingTransfers } from '@/lib/actions/payment.actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ApproveButton } from './ApproveButton';
+import { ConciliationActions } from './ConciliationActions';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
@@ -60,7 +60,7 @@ export default async function ConciliacionPage() {
                 </TableCell>
                 <TableCell>{(payment as any).recordedBy || 'Sistema'}</TableCell>
                 <TableCell className="text-right">
-                  <ApproveButton paymentId={payment.id} type={payment.type} />
+                  <ConciliationActions paymentId={payment.id} type={payment.type} />
                 </TableCell>
               </TableRow>
             ))}

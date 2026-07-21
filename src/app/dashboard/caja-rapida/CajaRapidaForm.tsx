@@ -85,7 +85,15 @@ export function CajaRapidaForm({ recordedBy }: Props) {
 
       <div className="space-y-2">
         <Label>Método de Pago</Label>
-        <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+        <Select 
+          value={paymentMethod} 
+          onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
+          items={{
+            CASH: 'Efectivo',
+            CARD: 'Tarjeta',
+            TRANSFER: 'Transferencia'
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar método" />
           </SelectTrigger>

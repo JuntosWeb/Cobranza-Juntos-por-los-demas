@@ -5,7 +5,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-jpld.png" alt="Juntos por los Demás" className="h-20 object-contain mb-6" />
+        <img src="/logo-jpld.png" alt="Juntos por los Demás" className="h-20 w-auto object-contain mb-6 drop-shadow-sm" />
         <p className="mt-2 text-center text-sm text-slate-500 max-w-sm">
           Plataforma de gestión administrativa y seguimiento de pagos.
         </p>

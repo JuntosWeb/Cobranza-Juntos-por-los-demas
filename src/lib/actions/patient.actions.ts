@@ -1,20 +1,24 @@
 "use server";
 
-import { PrismaClient } from '@prisma/client';
+import { PatientStatus } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-const prisma = new PrismaClient();
+
 
 type CreatePatientInput = {
   folio?: string;
   fullName: string;
-  category: 'FUNDACION' | 'PARTICULAR';
+  category: string;
   serviceId: string;
   frequency: number;
   scheduleType: string;
   agreedPrice: number;
   notes?: string;
   sponsorId?: string | null;
+  chargeInscription?: boolean;
+  status?: PatientStatus;
+  suspensionReason?: string | null;
 };
 
 export async function getServicePrices() {
@@ -27,6 +31,9 @@ export async function getServicePrices() {
 
 export async function createPatient(data: CreatePatientInput) {
   try {
+    const settings = await prisma.systemSettings.findFirst();
+    const inscriptionFee = settings?.inscriptionFee || 1700;
+
     const newPatient = await prisma.patient.create({
       data: {
         folio: data.folio || undefined,
@@ -41,7 +48,17 @@ export async function createPatient(data: CreatePatientInput) {
             scheduleType: data.scheduleType,
             agreedPrice: data.agreedPrice
           }
-        }
+        },
+        charges: data.chargeInscription ? {
+          create: {
+            periodMonth: new Date().getMonth() + 1,
+            periodYear: new Date().getFullYear(),
+            concept: "Inscripción Anual",
+            baseAmount: inscriptionFee,
+            dueDate: new Date(),
+            status: 'PENDING'
+          }
+        } : undefined
       }
     });
     
@@ -69,6 +86,8 @@ export async function updatePatient(patientId: string, data: CreatePatientInput)
         category: data.category,
         notes: data.notes,
         sponsorId: data.sponsorId,
+        status: data.status,
+        suspensionReason: data.suspensionReason
       }
     });
 
@@ -138,7 +157,9 @@ export async function getPatientsWithPaymentStatus() {
       // La dueDate del Charge *debería* estar bien calculada, pero aquí
       // determinamos dinámicamente si tiene mora usando la logica actualizada de días hábiles.
       // Si dueDate < now (es decir, ya pasó la fecha de pago), y no hay recargo ya guardado ni descuento manual base.
-      if (c.dueDate < now && currentLateFee === 0 && !hasDirectorDiscount) {
+      const shouldBypassLateFee = hasDirectorDiscount && (settings?.exemptDiscountedFromLateFees !== false);
+
+      if (c.dueDate < now && currentLateFee === 0 && !shouldBypassLateFee) {
         // Obtenemos el porcentaje de las settings
         const lateFeePercentage = settings?.lateFeePercentage || 0.10;
         currentLateFee = c.baseAmount * lateFeePercentage; // Recargo dinámico
@@ -233,5 +254,18 @@ export async function createExtraordinaryCharge(patientId: string, concept: stri
     return { success: true };
   } catch (error) {
     return { success: false, error: 'Error al generar cargo' };
+  }
+}
+
+export async function cancelCharge(chargeId: string) {
+  try {
+    await prisma.charge.update({
+      where: { id: chargeId },
+      data: { status: 'CANCELLED' }
+    });
+    revalidatePath('/dashboard/cobranza');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al cancelar cargo' };
   }
 }

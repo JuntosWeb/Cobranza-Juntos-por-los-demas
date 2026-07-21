@@ -5,12 +5,12 @@ import { addDays, getDay, startOfMonth, format, isAfter, isSameDay } from 'date-
  * Excluye Sábados (6) y Domingos (0).
  * Ahora también excluye las fechas pasadas en `holidays`.
  */
-export function getBusinessDays(targetDate: Date, holidays: Date[] = []): Date {
+export function getBusinessDays(targetDate: Date, holidays: Date[] = [], limitDays: number = 5): Date {
   const monthStart = startOfMonth(targetDate);
   let current = monthStart;
   let businessDaysCount = 0;
 
-  while (businessDaysCount < 5) {
+  while (businessDaysCount < limitDays) {
     const dayOfWeek = getDay(current);
 
     // Verificar si es un día festivo (tratando la DB date y el current ambos como fechas cortas UTC o con un simple includes)
@@ -24,7 +24,7 @@ export function getBusinessDays(targetDate: Date, holidays: Date[] = []): Date {
     if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday) {
       businessDaysCount++;
     }
-    if (businessDaysCount < 5) {
+    if (businessDaysCount < limitDays) {
       current = addDays(current, 1);
     }
   }
@@ -40,6 +40,7 @@ type CalculatePaymentInput = {
   lateFeePercentage?: number;
   quarterlyDiscountPercentage?: number;
   holidays?: Date[];
+  daysBeforeLateFee?: number;
 };
 
 type CalculatePaymentOutput = {
@@ -62,7 +63,8 @@ export function calculateMonthlyDue(input: CalculatePaymentInput): CalculatePaym
     customDiscount = 0,
     lateFeePercentage = 0.10,
     quarterlyDiscountPercentage = 0.10,
-    holidays = []
+    holidays = [],
+    daysBeforeLateFee = 5
   } = input;
 
   let subtotal = baseAmount;
@@ -77,10 +79,10 @@ export function calculateMonthlyDue(input: CalculatePaymentInput): CalculatePaym
 
   // 2. Verificamos mora (solo aplica si NO hay un descuento especial aplicado)
   if (customDiscount === 0) {
-    const fifthBusinessDay = getBusinessDays(targetMonth, holidays);
+    const limitDate = getBusinessDays(targetMonth, holidays, daysBeforeLateFee);
     // Solo se cobra recargo si NO se está pagando por adelantado
     // Y si se pagó después de la fecha límite
-    if (!isQuarterlyAdvance && isAfter(currentDate, fifthBusinessDay)) {
+    if (!isQuarterlyAdvance && isAfter(currentDate, limitDate)) {
       lateFeeApplied = baseAmount * lateFeePercentage;
     }
   }

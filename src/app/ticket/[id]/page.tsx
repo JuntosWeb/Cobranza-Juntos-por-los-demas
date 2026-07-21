@@ -1,14 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Printer } from 'lucide-react';
 
-const prisma = new PrismaClient();
 
-export default async function TicketPage({ params }: { params: { id: string } }) {
+
+export default async function TicketPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  const resolvedParams = await params;
   const payment = await prisma.payment.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     include: {
       patient: true,
       chargeAllocations: {

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { createPatient, updatePatient } from '@/lib/actions/patient.actions';
 import { getAllSponsors } from '@/lib/actions/sponsor-helpers.actions';
 
@@ -23,20 +24,23 @@ type ServicePriceData = {
 
 type Props = {
   groupedServices: Record<string, ServicePriceData[]>;
+  patientCategories?: string[];
   initialData?: {
     id: string;
     folio: string | null;
     fullName: string;
-    category: 'PARTICULAR' | 'FUNDACION';
+    category: string;
     serviceName: string;
     priceId: string;
     agreedPrice: number;
     sponsorId?: string | null;
+    status?: string;
+    suspensionReason?: string | null;
   };
   onSuccess?: () => void;
 };
 
-export function PatientForm({ groupedServices, initialData, onSuccess }: Props) {
+export function PatientForm({ groupedServices, patientCategories = ['PARTICULAR', 'FUNDACION'], initialData, onSuccess }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sponsors, setSponsors] = useState<{id: string, name: string, folio: string | null}[]>([]);
@@ -47,11 +51,14 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
 
   const [folio, setFolio] = useState(initialData?.folio || '');
   const [fullName, setFullName] = useState(initialData?.fullName || '');
-  const [category, setCategory] = useState<'PARTICULAR' | 'FUNDACION'>(initialData?.category || 'PARTICULAR');
+  const [category, setCategory] = useState<string>(initialData?.category || patientCategories[0] || 'PARTICULAR');
+  const [chargeInscription, setChargeInscription] = useState(true);
   const [selectedServiceName, setSelectedServiceName] = useState<string>(initialData?.serviceName || '');
   const [selectedPriceId, setSelectedPriceId] = useState<string>(initialData?.priceId || '');
   const [customPrice, setCustomPrice] = useState<number | ''>(initialData?.agreedPrice || '');
   const [sponsorId, setSponsorId] = useState<string>(initialData?.sponsorId || 'none');
+  const [status, setStatus] = useState<string>(initialData?.status || 'ACTIVE');
+  const [suspensionReason, setSuspensionReason] = useState<string>(initialData?.suspensionReason || '');
 
   const currentServiceOptions = selectedServiceName ? groupedServices[selectedServiceName] : [];
   const selectedPriceObj = currentServiceOptions?.find(p => p.id === selectedPriceId);
@@ -72,7 +79,10 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
       frequency: selectedPriceObj.frequency,
       scheduleType: selectedPriceObj.scheduleType,
       agreedPrice: finalPrice,
-      sponsorId: sponsorId !== 'none' ? sponsorId : null
+      sponsorId: sponsorId !== 'none' ? sponsorId : null,
+      chargeInscription,
+      status: status as any,
+      suspensionReason
     };
 
     let res;
@@ -97,22 +107,56 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="folio">Folio / Expediente (Opcional)</Label>
           <Input id="folio" value={folio} onChange={(e) => setFolio(e.target.value)} placeholder="Ej. F/1234" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Categoría</Label>
-          <Select value={category} onValueChange={(v) => setCategory(v as 'PARTICULAR' | 'FUNDACION')}>
+          <Select 
+            value={category} 
+            onValueChange={(v) => setCategory(v || '')}
+          >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="PARTICULAR">Particular</SelectItem>
-              <SelectItem value="FUNDACION">Fundación</SelectItem>
+              {patientCategories.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
+
+      {initialData && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="status">Estado del Paciente</Label>
+            <Select 
+              value={status} 
+              onValueChange={(v) => setStatus(v || 'ACTIVE')}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Activo</SelectItem>
+                <SelectItem value="SUSPENDED">Suspendido</SelectItem>
+                <SelectItem value="INACTIVE">Baja Definitiva</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {(status === 'SUSPENDED' || status === 'INACTIVE') && (
+            <div className="space-y-2">
+              <Label htmlFor="suspensionReason">Motivo de la Baja/Suspensión</Label>
+              <Input 
+                id="suspensionReason" 
+                value={suspensionReason} 
+                onChange={(e) => setSuspensionReason(e.target.value)} 
+                placeholder="Ej. Fuego incosteable, cambio de ciudad..."
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="fullName">Nombre Completo del Paciente</Label>
@@ -121,7 +165,14 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
 
       <div className="space-y-2">
         <Label htmlFor="sponsor">Padrino Asignado</Label>
-        <Select value={sponsorId} onValueChange={(v) => setSponsorId(v || 'none')}>
+        <Select 
+          value={sponsorId} 
+          onValueChange={(v) => setSponsorId(v || 'none')}
+          items={{
+            'none': '-- Sin Padrino --',
+            ...Object.fromEntries(sponsors.map(sp => [sp.id, `${sp.folio ? `${sp.folio} - ` : ''}${sp.name}`]))
+          }}
+        >
           <SelectTrigger><SelectValue placeholder="Seleccionar Padrino (Opcional)" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">-- Sin Padrino --</SelectItem>
@@ -134,7 +185,7 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
         <div className="space-y-2">
           <Label>Servicio a Inscribir</Label>
           <Select 
@@ -144,6 +195,7 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
               setSelectedPriceId('');
               setCustomPrice('');
             }}
+            items={Object.fromEntries(Object.keys(groupedServices).map(name => [name, name]))}
           >
             <SelectTrigger><SelectValue placeholder="Selecciona Servicio" /></SelectTrigger>
             <SelectContent>
@@ -163,6 +215,7 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
               setCustomPrice('');
             }}
             disabled={!selectedServiceName}
+            items={Object.fromEntries((currentServiceOptions || []).map(sp => [sp.id, `${sp.frequency}x sem - Horario ${sp.scheduleType} ($${sp.monthlyPrice})`]))}
           >
             <SelectTrigger><SelectValue placeholder="Selecciona modalidad" /></SelectTrigger>
             <SelectContent>
@@ -196,6 +249,24 @@ export function PatientForm({ groupedServices, initialData, onSuccess }: Props) 
               El precio que dejes aquí será la base para todos los cobros mensuales futuros.
             </p>
           </div>
+        </div>
+      )}
+
+      {!initialData && (
+        <div className="flex flex-col space-y-2 p-4 bg-slate-50 border rounded-md">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="chargeInscription"
+              checked={chargeInscription}
+              onCheckedChange={(c) => setChargeInscription(c as boolean)}
+            />
+            <Label htmlFor="chargeInscription" className="font-medium">
+              Generar cobro de inscripción inicial
+            </Label>
+          </div>
+          <p className="text-xs text-slate-500 pl-6">
+            Se generará automáticamente un recibo pendiente por el concepto de "Inscripción Anual" usando la cuota base configurada.
+          </p>
         </div>
       )}
 
