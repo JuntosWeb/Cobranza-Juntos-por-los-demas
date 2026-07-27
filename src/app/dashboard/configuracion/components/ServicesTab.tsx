@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, Tag, Archive } from 'lucide-react';
-import { createService, deleteService, updateService, upsertServicePrice, deactivateServicePrice } from '@/lib/actions/service.actions';
+import { createService, deleteService, updateService, upsertServicePrice, deactivateServicePrice, deleteServicePrice } from '@/lib/actions/service.actions';
 
 type ServicePrice = {
   id: string;
@@ -93,6 +93,13 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
     }
   };
 
+  const handleDeletePrice = async (id: string) => {
+    if (confirm('¿Seguro que deseas eliminar permanentemente esta tarifa?')) {
+      const res = await deleteServicePrice(id);
+      if (!res.success) alert(res.error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
@@ -153,8 +160,8 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
                           <Button variant="ghost" size="icon" onClick={() => openEditPrice(srv, p)}>
                             <Edit className="w-4 h-4 text-slate-500" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeactivatePrice(p.id)} title="Desactivar tarifa">
-                            <Archive className="w-4 h-4 text-orange-500" />
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePrice(p.id)} title="Eliminar tarifa">
+                            <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -167,7 +174,7 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
         ))}
       </div>
 
-      {/* modal pa nuevo o editar servicio */}
+      {/* Modal para agregar o editar un servicio */}
       <Dialog open={isServiceOpen} onOpenChange={(open) => {
         setIsServiceOpen(open);
         if (!open) { setEditingServiceId(null); setNewServiceName(''); }
@@ -189,7 +196,7 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
         </DialogContent>
       </Dialog>
 
-      {/* modal para tarifa */}
+      {/* Modal para agregar o editar una tarifa */}
       <Dialog open={isPriceOpen} onOpenChange={setIsPriceOpen}>
         <DialogContent>
           <DialogHeader>

@@ -114,3 +114,16 @@ export async function deactivateServicePrice(id: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function deleteServicePrice(id: string) {
+  try {
+    await checkAdmin();
+    await prisma.servicePrice.delete({
+      where: { id }
+    });
+    revalidatePath('/dashboard/configuracion');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: 'Ocurrió un error al eliminar el precio.' };
+  }
+}
