@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, DollarSign, History, HeartHandshake } from 'lucide-react';
+import { Edit, DollarSign, History, HeartHandshake, Trash2 } from 'lucide-react';
 import { SponsorModal } from './SponsorModal';
 import { SponsorPaymentModal } from './SponsorPaymentModal';
 import { SponsorPaymentHistoryModal } from './SponsorPaymentHistoryModal';
@@ -24,7 +24,7 @@ export function SponsorsTable({ sponsors }: Props) {
   const [historySponsor, setHistorySponsor] = useState<any | null>(null);
 
   const hasPaidMonth = (sponsor: any, monthPrefix: string) => {
-    // Checking if there is a payment that covers this month
+    // vemos si ya pagaron su mensualidad
     return sponsor.sponsorPayments.some((p: any) => 
       p.periodCovered && p.periodCovered.toUpperCase().includes(monthPrefix)
     );
@@ -45,7 +45,7 @@ export function SponsorsTable({ sponsors }: Props) {
         <Table className="min-w-[1200px]">
           <TableHeader className="bg-slate-50/50">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[250px]">Padrino / Datos</TableHead>
+              <TableHead className="w-[250px] sticky left-0 bg-slate-50/50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Padrino / Datos</TableHead>
               <TableHead>Ahijados</TableHead>
               {MONTHS.map(m => (
                 <TableHead key={m} className="text-center text-xs">{m}</TableHead>
@@ -70,7 +70,7 @@ export function SponsorsTable({ sponsors }: Props) {
               sponsors.map((sponsor) => {
                 return (
                   <TableRow key={sponsor.id} className="hover:bg-slate-50/80 transition-colors duration-200">
-                    <TableCell>
+                    <TableCell className="sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                       <div className="font-medium">{sponsor.name}</div>
                       <div className="text-xs text-slate-500">
                         Folio: {sponsor.folio || 'N/A'} | {sponsor.periodicity}
@@ -97,6 +97,7 @@ export function SponsorsTable({ sponsors }: Props) {
                           {paid ? (
                             <div className="w-6 h-6 mx-auto bg-green-500 rounded-full flex items-center justify-center">
                               <span className="text-white text-[10px] font-bold">✓</span>
+                              <span className="sr-only">Pagado</span>
                             </div>
                           ) : (
                             <div className="w-6 h-6 mx-auto border-2 border-slate-200 rounded-full"></div>
@@ -111,6 +112,7 @@ export function SponsorsTable({ sponsors }: Props) {
                         size="icon"
                         onClick={() => { setHistorySponsor(sponsor); setIsHistoryModalOpen(true); }}
                         title="Ver Historial / Anular"
+                        aria-label="Ver Historial o Anular Pagos"
                         className="hover:bg-slate-100 hover:text-blue-600 transition-colors"
                       >
                         <History className="w-4 h-4 text-blue-600" />
@@ -120,6 +122,7 @@ export function SponsorsTable({ sponsors }: Props) {
                         size="icon"
                         onClick={() => { setPayingSponsor(sponsor); setIsPaymentModalOpen(true); }}
                         title="Registrar Pago"
+                        aria-label="Registrar Pago de Donativo"
                         className="hover:bg-green-50 hover:border-green-200 transition-colors"
                       >
                         <DollarSign className="w-4 h-4 text-green-600" />
@@ -129,9 +132,26 @@ export function SponsorsTable({ sponsors }: Props) {
                         size="icon"
                         onClick={() => { setEditingSponsor(sponsor); setIsSponsorModalOpen(true); }}
                         title="Editar Padrino"
+                        aria-label="Editar Padrino"
                         className="hover:bg-slate-100 transition-colors"
                       >
                         <Edit className="w-4 h-4 text-slate-600" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={async () => {
+                          if(confirm('¿Seguro que deseas eliminar este padrino? Esta acción eliminará su historial de pagos y no se puede deshacer.')) {
+                            const { deleteSponsor } = await import('@/lib/actions/sponsor.actions');
+                            const res = await deleteSponsor(sponsor.id);
+                            if (!res.success) alert(res.error);
+                          }
+                        }}
+                        title="Eliminar Padrino"
+                        aria-label="Eliminar Padrino"
+                        className="hover:bg-red-50 hover:border-red-200 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>
                     </TableCell>
                   </TableRow>

@@ -22,6 +22,7 @@ export function CajaRapidaGastosForm({ recordedBy, recentExpenses }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
+  // Función para eliminar el gasto en caso de error
   const handleCancelExpense = async (id: string) => {
     if (!confirm('¿Estás seguro de anular este gasto?')) return;
     setCancellingId(id);
@@ -34,6 +35,7 @@ export function CajaRapidaGastosForm({ recordedBy, recentExpenses }: Props) {
     }
   };
 
+  // mandamos los datos del formulario a la base de datos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!concept || !amount) return;
@@ -79,7 +81,7 @@ export function CajaRapidaGastosForm({ recordedBy, recentExpenses }: Props) {
         <Label>Notas Adicionales (Opcional)</Label>
         <Input placeholder="Folio de factura o ticket" value={notes} onChange={e => setNotes(e.target.value)} />
       </div>
-      <Button type="submit" disabled={isSubmitting} className="w-full" variant="destructive">
+      <Button type="submit" disabled={isSubmitting} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
         {isSubmitting ? 'Procesando...' : 'Registrar Salida de Efectivo'}
       </Button>
 
@@ -103,6 +105,7 @@ export function CajaRapidaGastosForm({ recordedBy, recentExpenses }: Props) {
                   className="text-red-500 hover:text-red-700"
                   onClick={() => handleCancelExpense(exp.id)}
                   disabled={cancellingId === exp.id}
+                  aria-label="Anular gasto"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

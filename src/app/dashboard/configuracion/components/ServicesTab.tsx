@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, Tag, Archive } from 'lucide-react';
-import { createService, deleteService, upsertServicePrice, deactivateServicePrice } from '@/lib/actions/service.actions';
+import { createService, deleteService, updateService, upsertServicePrice, deactivateServicePrice } from '@/lib/actions/service.actions';
 
 type ServicePrice = {
   id: string;
@@ -26,6 +26,7 @@ type Service = {
 
 export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { services: Service[], scheduleTypes?: string[] }) {
   const [isServiceOpen, setIsServiceOpen] = useState(false);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [newServiceName, setNewServiceName] = useState('');
   
   const [isPriceOpen, setIsPriceOpen] = useState(false);
@@ -37,10 +38,14 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
   const handleAddService = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const res = await createService(newServiceName);
+    const res = editingServiceId 
+      ? await updateService(editingServiceId, newServiceName)
+      : await createService(newServiceName);
+      
     if (res.success) {
       setIsServiceOpen(false);
       setNewServiceName('');
+      setEditingServiceId(null);
     } else alert(res.error);
     setIsSubmitting(false);
   };
@@ -113,6 +118,13 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
                 <Button variant="outline" size="sm" onClick={() => openNewPrice(srv)}>
                   <Plus className="w-4 h-4 mr-1" /> Agregar Tarifa
                 </Button>
+                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-800" onClick={() => {
+                  setEditingServiceId(srv.id);
+                  setNewServiceName(srv.name);
+                  setIsServiceOpen(true);
+                }}>
+                  <Edit className="w-4 h-4" />
+                </Button>
                 <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDeleteService(srv.id)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -155,11 +167,14 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
         ))}
       </div>
 
-      {/* Modal Nuevo Servicio */}
-      <Dialog open={isServiceOpen} onOpenChange={setIsServiceOpen}>
+      {/* modal pa nuevo o editar servicio */}
+      <Dialog open={isServiceOpen} onOpenChange={(open) => {
+        setIsServiceOpen(open);
+        if (!open) { setEditingServiceId(null); setNewServiceName(''); }
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nuevo Servicio</DialogTitle>
+            <DialogTitle>{editingServiceId ? 'Editar Servicio' : 'Nuevo Servicio'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddService} className="space-y-4 pt-4">
             <div className="space-y-2">
@@ -174,7 +189,7 @@ export function ServicesTab({ services, scheduleTypes = ['A', 'B', 'C'] }: { ser
         </DialogContent>
       </Dialog>
 
-      {/* Modal Tarifa */}
+      {/* modal para tarifa */}
       <Dialog open={isPriceOpen} onOpenChange={setIsPriceOpen}>
         <DialogContent>
           <DialogHeader>

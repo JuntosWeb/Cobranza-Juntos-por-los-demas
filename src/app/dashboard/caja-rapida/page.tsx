@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma';
 
 
 
+// esta es la pagina principal de la caja rapida
 export default async function CajaRapidaPage() {
   const session = await auth();
   const recordedBy = session?.user?.email || 'Desconocido';

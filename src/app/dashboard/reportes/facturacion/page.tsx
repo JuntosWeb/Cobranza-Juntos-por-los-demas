@@ -7,6 +7,15 @@ import { es } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic';
 
+const methodEs: Record<string, string> = {
+  CASH: 'Efectivo',
+  CARD: 'Tarjeta',
+  TRANSFER: 'Transferencia',
+  TC: 'Tarjeta / Plataforma',
+  DEPOSITO: 'Depósito',
+  ESPECIE: 'Especie'
+};
+
 export default async function FacturacionPage() {
   const payments = await getPaymentsForBilling();
 
@@ -52,7 +61,7 @@ export default async function FacturacionPage() {
                   <TableCell className="font-bold text-green-600">
                     ${p.amount.toFixed(2)}
                   </TableCell>
-                  <TableCell>{p.paymentMethod}</TableCell>
+                  <TableCell>{methodEs[p.paymentMethod] || p.paymentMethod}</TableCell>
                   <TableCell>{p.cfdiUse || 'Por definir'}</TableCell>
                   <TableCell className="text-xs max-w-xs break-words">
                     {(p as any).sponsor?.billingData || 'No especificados'}

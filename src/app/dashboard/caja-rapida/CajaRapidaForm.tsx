@@ -20,6 +20,7 @@ export function CajaRapidaForm({ recordedBy }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastReceipt, setLastReceipt] = useState<string | null>(null);
 
+  // Función que se ejecuta al presionar el botón
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -47,6 +48,7 @@ export function CajaRapidaForm({ recordedBy }: Props) {
     }
   };
 
+  // A partir de aquí comienza el código visual del formulario
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">

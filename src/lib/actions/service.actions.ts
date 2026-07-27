@@ -36,6 +36,20 @@ export async function createService(name: string) {
   }
 }
 
+export async function updateService(id: string, name: string) {
+  try {
+    await checkAdmin();
+    await prisma.service.update({
+      where: { id },
+      data: { name: name.trim().toUpperCase() }
+    });
+    revalidatePath('/dashboard/configuracion');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function deleteService(id: string) {
   try {
     await checkAdmin();
@@ -45,7 +59,10 @@ export async function deleteService(id: string) {
     revalidatePath('/dashboard/configuracion');
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: 'No se puede eliminar porque está en uso por pacientes.' };
+    if (error.code === 'P2003') {
+      return { success: false, error: 'No se puede eliminar porque este servicio ya está asignado a pacientes o tiene tarifas activas.' };
+    }
+    return { success: false, error: 'Ocurrió un error al eliminar el servicio.' };
   }
 }
 

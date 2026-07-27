@@ -10,7 +10,7 @@ export default async function PacientesPage() {
     getSystemSettings()
   ]);
 
-  // Agrupamos por servicio para el frontend
+  // Utilizamos reduce para agrupar los servicios correctamente
   const groupedServices = servicePrices.reduce((acc, curr) => {
     const sName = curr.service.name;
     if (!acc[sName]) acc[sName] = [];

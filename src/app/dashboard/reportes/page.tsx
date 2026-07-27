@@ -9,10 +9,17 @@ import { ChevronDown, FileText, UserX, AlertTriangle, Receipt, Stethoscope } fro
 
 export const dynamic = 'force-dynamic';
 
-
+const methodEs: Record<string, string> = {
+  CASH: 'Efectivo',
+  CARD: 'Tarjeta',
+  TRANSFER: 'Transferencia',
+  TC: 'Tarjeta / Plataforma',
+  DEPOSITO: 'Depósito',
+  ESPECIE: 'Especie'
+};
 
 export default async function ReportesPage() {
-  // Para el MVP, obtenemos los últimos 50 pagos de ambos
+  // Obtenemos los últimos 50 pagos para optimizar la carga de la página
   const payments = await prisma.payment.findMany({
     take: 50,
     orderBy: { paymentDate: 'desc' },
@@ -33,7 +40,7 @@ export default async function ReportesPage() {
     ...sponsorPayments.map(p => ({ ...p, type: 'SPONSOR' as const, finalAmountPaid: p.amount }))
   ].sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()).slice(0, 50);
 
-  // Calculamos ingresos EXCLUYENDO pagos EN ESPECIE (no es dinero líquido)
+  // Sumamos el dinero real y omitimos los pagos en especie
   const totalIngresos = allPayments.reduce((acc, p) => {
     if (p.paymentMethod === 'ESPECIE') return acc;
     return acc + p.finalAmountPaid;
@@ -44,7 +51,7 @@ export default async function ReportesPage() {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 gap-4 xl:gap-0">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">Reporte de Ingresos</h1>
         
-        {/* Mobile / Tablet View: Dropdown Menu */}
+        {/* el menu que sale cuando lo ves en celular */}
         <div className="xl:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" className="w-full sm:w-auto font-semibold shadow-sm" />}>
@@ -87,7 +94,7 @@ export default async function ReportesPage() {
           </DropdownMenu>
         </div>
 
-        {/* Desktop View: Full Buttons */}
+        {/* los botones grandotes para la compu */}
         <div className="hidden xl:flex gap-4">
           <Link href="/dashboard/reportes/valoraciones">
             <Button variant="outline">Ver Valoraciones Médicas</Button>
@@ -159,7 +166,7 @@ export default async function ReportesPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {payment.paymentMethod}
+                    {methodEs[payment.paymentMethod] || payment.paymentMethod}
                     {payment.paymentMethod === 'ESPECIE' && <span className="block text-[10px] text-orange-500">(No suma al total)</span>}
                   </TableCell>
                   <TableCell className="text-xs">{(payment as any).recordedBy || 'Sistema'}</TableCell>

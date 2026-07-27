@@ -7,6 +7,15 @@ import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
 import { cancelSponsorPayment } from '@/lib/actions/sponsor.actions';
 
+const methodEs: Record<string, string> = {
+  CASH: 'Efectivo',
+  CARD: 'Tarjeta',
+  TRANSFER: 'Transferencia',
+  TC: 'Tarjeta / Plataforma',
+  DEPOSITO: 'Depósito',
+  ESPECIE: 'Especie'
+};
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -52,7 +61,7 @@ export function SponsorPaymentHistoryModal({ isOpen, onClose, sponsor }: Props) 
                     {payment.status === 'CANCELLED' && <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">ANULADO</span>}
                   </p>
                   <p className="text-sm text-slate-600">
-                    {format(new Date(payment.paymentDate), 'dd MMM yyyy')} - {payment.paymentMethod}
+                    {format(new Date(payment.paymentDate), 'dd MMM yyyy')} - {methodEs[payment.paymentMethod] || payment.paymentMethod}
                   </p>
                   {payment.periodCovered && (
                     <p className="text-xs text-slate-500">

@@ -77,7 +77,7 @@ export async function createPatient(data: CreatePatientInput) {
 
 export async function updatePatient(patientId: string, data: CreatePatientInput) {
   try {
-    // Actualizamos datos básicos
+    // aqui le movemos a los datos basicos del paciente
     await prisma.patient.update({
       where: { id: patientId },
       data: {
@@ -91,7 +91,7 @@ export async function updatePatient(patientId: string, data: CreatePatientInput)
       }
     });
 
-    // Actualizamos el servicio. Borramos el actual y creamos el nuevo.
+    // quitamos el servicio viejo y metemos el nuevo para que funcione
     await prisma.patientService.deleteMany({ where: { patientId } });
     await prisma.patientService.create({
       data: {
@@ -133,7 +133,7 @@ export async function getPatientsWithPaymentStatus() {
   const holidays = settings?.holidays || [];
 
   return patients.map(p => {
-    // El status real de mora se determina si hay algún cargo PENDING cuya dueDate ya pasó
+    // si el paciente debe dinero y ya paso la fecha de pago lo marcamos como moroso
     const now = new Date();
     let hasLateFee = false;
     let totalDebt = 0;
@@ -154,15 +154,13 @@ export async function getPatientsWithPaymentStatus() {
     const pendingCharges = p.charges.map(c => {
       let currentLateFee = c.lateFee;
 
-      // La dueDate del Charge *debería* estar bien calculada, pero aquí
-      // determinamos dinámicamente si tiene mora usando la logica actualizada de días hábiles.
-      // Si dueDate < now (es decir, ya pasó la fecha de pago), y no hay recargo ya guardado ni descuento manual base.
+      // Verificamos si la fecha límite de pago ha pasado para aplicar el recargo
       const shouldBypassLateFee = hasDirectorDiscount && (settings?.exemptDiscountedFromLateFees !== false);
 
       if (c.dueDate < now && currentLateFee === 0 && !shouldBypassLateFee) {
-        // Obtenemos el porcentaje de las settings
+        // sacamos cuanto le vamos a cobrar de recargo
         const lateFeePercentage = settings?.lateFeePercentage || 0.10;
-        currentLateFee = c.baseAmount * lateFeePercentage; // Recargo dinámico
+        currentLateFee = c.baseAmount * lateFeePercentage; // Sumamos el recargo dinámico
       }
       if (currentLateFee > 0) hasLateFee = true;
       totalDebt += (c.baseAmount + currentLateFee);
@@ -188,7 +186,7 @@ export async function getPatientsWithPaymentStatus() {
       hasLateFee,
       totalDebt,
       pendingCharges,
-      // TODO: pending transfer check logic can be added later by checking Payment status
+      // TODO: aqui me falta checar si la transferencia ya paso o sigue pendiente, luego lo hago
       hasPendingTransfer: false 
     };
   });
@@ -201,7 +199,7 @@ export async function getPatientsForSuspension() {
   const limitDate = new Date();
   limitDate.setDate(limitDate.getDate() - (weeksLimit * 7));
 
-  // Buscar pacientes ACTIVOS que tengan cargos PENDING con dueDate anterior al límite
+  // buscamos los pacientes que ya se pasaron del limite de semanas sin pagar
   const patients = await prisma.patient.findMany({
     where: {
       status: 'ACTIVE',

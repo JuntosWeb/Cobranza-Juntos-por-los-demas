@@ -20,6 +20,7 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
   const [formData, setFormData] = useState({
     amount: sponsor.monthlyCommitment.toString(),
     commission: '0',
+    paymentDate: new Date().toISOString().split('T')[0],
     paymentMethod: 'TRANSFER',
     periodCovered: '',
     receiptNumber: '',
@@ -35,7 +36,7 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
       sponsorId: sponsor.id,
       amount: Number(formData.amount),
       commission: Number(formData.commission),
-      paymentDate: new Date(),
+      paymentDate: new Date(formData.paymentDate + 'T12:00:00Z'),
       paymentMethod: formData.paymentMethod,
       periodCovered: formData.periodCovered,
       receiptNumber: formData.receiptNumber,
@@ -69,6 +70,18 @@ export function SponsorPaymentModal({ isOpen, onClose, sponsor }: Props) {
                 onChange={e => setFormData({ ...formData, amount: e.target.value })}
               />
             </div>
+            <div className="space-y-2">
+              <Label>Fecha del Depósito/Donativo</Label>
+              <Input 
+                type="date"
+                required
+                value={formData.paymentDate} 
+                onChange={e => setFormData({ ...formData, paymentDate: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Mes(es) que cubre</Label>
               <Select 

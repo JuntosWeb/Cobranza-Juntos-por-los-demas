@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# chats y documentos sensibles
+Chat de WhatsApp con Daniel juntos Por Los Demás/

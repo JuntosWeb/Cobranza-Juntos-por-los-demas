@@ -124,7 +124,8 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
                   MENSUAL: 'Mensual',
                   TRIMESTRAL: 'Trimestral',
                   SEMESTRAL: 'Semestral',
-                  ANUAL: 'Anual'
+                  ANUAL: 'Anual',
+                  UNICA_VEZ: 'Única Vez'
                 }}
               >
                 <SelectTrigger><SelectValue/></SelectTrigger>
@@ -133,6 +134,7 @@ export function SponsorModal({ isOpen, onClose, sponsor }: Props) {
                   <SelectItem value="TRIMESTRAL">Trimestral</SelectItem>
                   <SelectItem value="SEMESTRAL">Semestral</SelectItem>
                   <SelectItem value="ANUAL">Anual</SelectItem>
+                  <SelectItem value="UNICA_VEZ">Única Vez</SelectItem>
                 </SelectContent>
               </Select>
             </div>

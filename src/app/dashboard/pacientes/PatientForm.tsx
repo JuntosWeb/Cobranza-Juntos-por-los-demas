@@ -63,6 +63,7 @@ export function PatientForm({ groupedServices, patientCategories = ['PARTICULAR'
   const currentServiceOptions = selectedServiceName ? groupedServices[selectedServiceName] : [];
   const selectedPriceObj = currentServiceOptions?.find(p => p.id === selectedPriceId);
 
+  // Función que se ejecuta al presionar el botón de guardar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPriceObj) return;
@@ -105,6 +106,7 @@ export function PatientForm({ groupedServices, patientCategories = ['PARTICULAR'
     }
   };
 
+  // Aquí comienza el código HTML del formulario
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

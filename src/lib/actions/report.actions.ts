@@ -32,10 +32,10 @@ export async function getAuditReportData(periodMonth: number, periodYear: number
     const patient = charge.patient;
     const primaryService = patient.services[0];
     
-    // Suma de pagos realizados a este cargo
+    // sumamos cuanto han pagado de este cargo
     const totalPaid = charge.paymentAllocations.reduce((acc, alloc) => acc + alloc.amountAllocated, 0);
     
-    // Si hay un pago, la fecha del primer pago nos puede dar una idea de la semana
+    // agarramos la fecha del primer pago para ver en que semana pagaron
     const firstPaymentDate = charge.paymentAllocations.length > 0 
       ? charge.paymentAllocations[0].payment.paymentDate 
       : null;
@@ -55,7 +55,7 @@ export async function getAuditReportData(periodMonth: number, periodYear: number
       pago: totalPaid,
       precioDeLista: charge.baseAmount,
       inscripcionORecargo: charge.concept || '',
-      descuento: 0, // El descuento de direccin ya va restado en el agreedPrice, se podra calcular si guardamos la diferencia
+      descuento: 0, // el descuento ya se le quito antes asi que aqui ponemos 0 por si acaso
       recargos: charge.lateFee,
       comentarios: patient.notes || '',
       estado: charge.status,

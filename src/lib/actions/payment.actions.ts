@@ -24,7 +24,7 @@ type RegisterPaymentInput = {
 
 export async function registerPayment(data: RegisterPaymentInput) {
   try {
-    // Si es un pago rápido (valoración sin paciente)
+    // si es un cobro rapido sin paciente registrado
     if (data.isQuickPayment) {
       const receiptNumber = `N${Math.floor(10000 + Math.random() * 90000)}`;
       const newPayment = await prisma.payment.create({
@@ -45,7 +45,7 @@ export async function registerPayment(data: RegisterPaymentInput) {
       return { success: true, payment: newPayment };
     }
 
-    // Pago de paciente normal
+    // aqui cobramos a un paciente que si esta en la base de datos
     if (!data.patientId || !data.chargeIds || data.chargeIds.length === 0) {
       return { success: false, error: 'Datos incompletos para procesar el pago' };
     }
@@ -54,9 +54,28 @@ export async function registerPayment(data: RegisterPaymentInput) {
       return { success: false, error: 'El monto de pago es inválido.' };
     }
 
-    // Creamos la transacción del pago, relacionando con PaymentCharge y actualizando los Charges a PAID
+    // Lógica para obtener el número de recibo consecutivo
+    let receiptNumber = '';
+    if (data.isQuickPayment) {
+      receiptNumber = `N${Math.floor(10000 + Math.random() * 90000)}`;
+    } else {
+      const lastPayment = await prisma.payment.findFirst({
+        where: { receiptNumber: { startsWith: 'REC-' } },
+        orderBy: { createdAt: 'desc' }
+      });
+      let nextId = 1;
+      if (lastPayment && lastPayment.receiptNumber) {
+        const match = lastPayment.receiptNumber.match(/REC-(\d+)/);
+        if (match && match[1]) {
+          nextId = parseInt(match[1], 10) + 1;
+        }
+      }
+      receiptNumber = `REC-${nextId.toString().padStart(4, '0')}`;
+    }
+
+    // guardamos el pago y ponemos los cargos como pagados en la base de datos
     const newPayment = await prisma.$transaction(async (tx) => {
-      // 1. Crear el registro de Payment
+      // paso 1: guardar el pago
       const payment = await tx.payment.create({
         data: {
           patientId: data.patientId,
@@ -68,13 +87,14 @@ export async function registerPayment(data: RegisterPaymentInput) {
           finalAmountPaid: data.finalAmountPaid,
           paymentMethod: data.paymentMethod,
           recordedBy: data.recordedBy,
+          receiptNumber,
           status: data.paymentMethod === 'TRANSFER' ? 'PENDING' : 'COMPLETED',
         }
       });
 
-      // 2. Crear las relaciones en PaymentCharge y actualizar los Charges a PAID
+      // paso 2: enlazar los cargos y actualizarlos
       for (const chargeId of data.chargeIds!) {
-        // Actualización ATÓMICA para prevenir Race Conditions (Doble Cobro)
+        // Verificamos que no se cobre doble si presionan el botón varias veces
         const updateResult = await tx.charge.updateMany({
           where: { id: chargeId, status: 'PENDING' },
           data: { status: 'PAID' }
@@ -84,7 +104,7 @@ export async function registerPayment(data: RegisterPaymentInput) {
           throw new Error('El cargo ya fue pagado en otra sesión. Transacción abortada para prevenir cobro doble.');
         }
 
-        // Recuperamos el cargo para extraer sus montos
+        // sacamos la info del cargo de la base
         const charge = await tx.charge.findUniqueOrThrow({
           where: { id: chargeId }
         });

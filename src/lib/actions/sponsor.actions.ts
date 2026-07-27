@@ -68,6 +68,27 @@ export async function upsertSponsor(data: SponsorInput) {
   }
 }
 
+export async function deleteSponsor(id: string) {
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.patient.updateMany({
+        where: { sponsorId: id },
+        data: { sponsorId: null }
+      });
+      await tx.sponsorPayment.deleteMany({
+        where: { sponsorId: id }
+      });
+      await tx.sponsor.delete({
+        where: { id }
+      });
+    });
+    revalidatePath('/dashboard/padrinos');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: 'Error al eliminar padrino' };
+  }
+}
+
 type SponsorPaymentInput = {
   sponsorId: string;
   amount: number;
@@ -91,6 +112,19 @@ export async function registerSponsorPayment(data: SponsorPaymentInput) {
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
+  }
+}
+
+export async function updateSponsorPaymentReceipt(id: string, receiptNumber: string) {
+  try {
+    await prisma.sponsorPayment.update({
+      where: { id },
+      data: { receiptNumber }
+    });
+    revalidatePath('/dashboard/padrinos');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: 'Error al actualizar el folio' };
   }
 }
 

@@ -7,6 +7,15 @@ import { getPatientRecentPayments, rejectTransfer } from '@/lib/actions/payment.
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
 
+const methodEs: Record<string, string> = {
+  CASH: 'Efectivo',
+  CARD: 'Tarjeta',
+  TRANSFER: 'Transferencia',
+  TC: 'Tarjeta / Plataforma',
+  DEPOSITO: 'Depósito',
+  ESPECIE: 'Especie'
+};
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -62,7 +71,7 @@ export function PaymentHistoryModal({ isOpen, onClose, patientId, patientName }:
               {payments.map(payment => (
                 <div key={payment.id} className="flex items-center justify-between p-4 bg-slate-50 border rounded-lg">
                   <div>
-                    <p className="font-bold">${payment.finalAmountPaid.toFixed(2)} - {payment.paymentMethod}</p>
+                    <p className="font-bold">${payment.finalAmountPaid.toFixed(2)} - {methodEs[payment.paymentMethod] || payment.paymentMethod}</p>
                     <p className="text-xs text-slate-500">Fecha: {format(new Date(payment.createdAt), 'dd/MM/yyyy HH:mm')} | Status: {payment.status}</p>
                     <p className="text-xs text-slate-500">Folio: {payment.receiptNumber || payment.id.slice(-6).toUpperCase()}</p>
                     {payment.chargeAllocations?.length > 0 && (

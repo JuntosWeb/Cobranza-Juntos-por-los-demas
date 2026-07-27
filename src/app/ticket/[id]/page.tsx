@@ -2,9 +2,7 @@ import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Printer } from 'lucide-react';
-
-
+import { PrintButton } from './PrintButton';
 
 export default async function TicketPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = await params;
@@ -22,24 +20,31 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
     notFound();
   }
 
+  // Fetch the actual user name if recordedBy is a username
+  const recordedUser = await prisma.user.findFirst({
+    where: { username: payment.recordedBy }
+  });
+  const userNameDisplay = recordedUser ? recordedUser.name : payment.recordedBy.split('@')[0];
+
+  const methodEs: Record<string, string> = {
+    CASH: 'Efectivo',
+    CARD: 'Tarjeta',
+    TRANSFER: 'Transferencia',
+    TC: 'Tarjeta / Plataforma',
+    DEPOSITO: 'Depósito',
+    ESPECIE: 'Especie'
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center py-10 print:bg-white print:py-0">
       
       {/* Botón de impresión (oculto al imprimir) */}
       <div className="mb-6 print:hidden">
-        <button 
-          // @ts-ignore - onclick is client side, so we use a simple script or just make a client component if needed. Actually we can't use onClick in server component.
-          // But we can add a small script tag.
-          className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2"
-        >
-          <Printer className="w-5 h-5" />
-          Imprimir Recibo
-        </button>
-        <script dangerouslySetInnerHTML={{ __html: `document.querySelector('button').addEventListener('click', () => window.print())` }} />
+        <PrintButton />
       </div>
 
       {/* Contenedor del Ticket */}
-      <div className="bg-white w-full max-w-sm p-8 rounded-xl shadow-xl border border-slate-200 print:shadow-none print:border-none print:p-0 text-slate-800">
+      <div className="bg-white w-full max-w-sm p-8 rounded-xl shadow-xl border border-slate-200 print:shadow-none print:border-none print:p-0 text-slate-800 print:text-black">
         
         <div className="text-center mb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -59,11 +64,11 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Le Atendió:</span>
-            <span className="uppercase">{payment.recordedBy.split('@')[0]}</span>
+            <span className="uppercase">{userNameDisplay}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Método:</span>
-            <span>{payment.paymentMethod}</span>
+            <span>{methodEs[payment.paymentMethod] || payment.paymentMethod}</span>
           </div>
         </div>
 
@@ -81,14 +86,14 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
           <p className="font-bold mb-2">Conceptos Pagados:</p>
           {payment.isQuickPayment ? (
             <div className="flex justify-between">
-              <span>Caja Rápida / Valoración</span>
+              <span>{payment.quickPaymentNotes || 'Caja Rápida / Valoración'}</span>
               <span>${payment.totalBaseAmount.toFixed(2)}</span>
             </div>
           ) : (
             <div className="space-y-1">
               {payment.chargeAllocations.map(ca => (
                 <div key={ca.id} className="flex justify-between">
-                  <span>Mes {ca.charge.periodMonth}/{ca.charge.periodYear}</span>
+                  <span>{ca.charge.concept || `Mes ${ca.charge.periodMonth}/${ca.charge.periodYear}`}</span>
                   <span>${ca.amountAllocated.toFixed(2)}</span>
                 </div>
               ))}

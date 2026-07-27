@@ -16,7 +16,7 @@ type ServicePriceData = {
 };
 
 type Props = {
-  patient: any; // Type from getPatientsWithPaymentStatus
+  patient: any; // tipo que viene de la funcion de pago
   groupedServices: any;
   patientCategories?: string[];
 };
@@ -24,7 +24,7 @@ type Props = {
 export function EditPatientModal({ patient, groupedServices, patientCategories }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Find the exact priceId based on the patient's current service
+  // buscar el id del precio del servicio del paciente
   const currentServiceGroup = groupedServices[patient.serviceName] || [];
   const currentPriceObj = currentServiceGroup.find((p: any) => p.frequency === patient.frequency && p.scheduleType === patient.scheduleType);
 
