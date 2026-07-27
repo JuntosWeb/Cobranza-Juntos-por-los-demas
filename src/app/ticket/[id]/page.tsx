@@ -9,7 +9,15 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
   const payment = await prisma.payment.findUnique({
     where: { id: resolvedParams.id },
     include: {
-      patient: true,
+      patient: {
+        include: {
+          services: {
+            include: {
+              service: true
+            }
+          }
+        }
+      },
       chargeAllocations: {
         include: { charge: true }
       }
@@ -91,12 +99,27 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             </div>
           ) : (
             <div className="space-y-1">
-              {payment.chargeAllocations.map(ca => (
-                <div key={ca.id} className="flex justify-between">
-                  <span>{ca.charge.concept || `Mes ${ca.charge.periodMonth}/${ca.charge.periodYear}`}</span>
-                  <span>${ca.amountAllocated.toFixed(2)}</span>
-                </div>
-              ))}
+              {payment.chargeAllocations.map(ca => {
+                const isMonthly = !ca.charge.concept;
+                const periodStr = `Mes ${ca.charge.periodMonth}/${ca.charge.periodYear}`;
+                const therapies = payment.patient?.services.map(s => s.service?.name).filter(Boolean).join(' + ');
+                const conceptName = isMonthly ? (therapies ? `${periodStr} - ${therapies}` : periodStr) : ca.charge.concept;
+                
+                return (
+                  <div key={ca.id} className="flex flex-col">
+                    <div className="flex justify-between">
+                      <span>{conceptName}</span>
+                      <span>${ca.charge.baseAmount.toFixed(2)}</span>
+                    </div>
+                    {ca.charge.lateFee > 0 && (
+                      <div className="flex justify-between text-slate-500 mt-1">
+                        <span>Otros cargos (Morosidad)</span>
+                        <span>${ca.charge.lateFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 

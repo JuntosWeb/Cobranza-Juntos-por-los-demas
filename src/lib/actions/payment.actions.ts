@@ -3,7 +3,7 @@
 import { PaymentMethod } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-
+import { auth } from '@/auth';
 
 
 type RegisterPaymentInput = {
@@ -32,7 +32,7 @@ export async function registerPayment(data: RegisterPaymentInput) {
           totalBaseAmount: data.totalBaseAmount,
           finalAmountPaid: data.totalBaseAmount,
           paymentMethod: data.paymentMethod,
-          recordedBy: data.recordedBy,
+          recordedBy: (await auth())?.user?.name || 'Sistema',
           isQuickPayment: true,
           quickPaymentName: data.quickPaymentName,
           quickPaymentNotes: data.quickPaymentNotes,
@@ -86,7 +86,7 @@ export async function registerPayment(data: RegisterPaymentInput) {
           customDiscountReason: data.customDiscountReason,
           finalAmountPaid: data.finalAmountPaid,
           paymentMethod: data.paymentMethod,
-          recordedBy: data.recordedBy,
+          recordedBy: (await auth())?.user?.name || 'Sistema',
           receiptNumber,
           status: data.paymentMethod === 'TRANSFER' ? 'PENDING' : 'COMPLETED',
         }
