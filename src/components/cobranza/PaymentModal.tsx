@@ -52,9 +52,11 @@ export function PaymentModal({
   const totalBaseAmount = selectedCharges.reduce((acc, c) => acc + c.baseAmount, 0);
   const totalLateFee = selectedCharges.reduce((acc, c) => acc + c.calculatedLateFee, 0);
   
-  // Descuento trimestral automático si paga 3 o más cargos de una vez
-  const isQuarterly = selectedCharges.length >= 3;
-  const quarterlyDiscountAmount = isQuarterly ? totalBaseAmount * 0.10 : 0;
+  // Descuento trimestral automático: Solo cuenta los cargos regulares (sin concepto)
+  const regularCharges = selectedCharges.filter(c => !c.concept);
+  const isQuarterly = regularCharges.length >= 3;
+  const regularBaseAmount = regularCharges.reduce((acc, c) => acc + c.baseAmount, 0);
+  const quarterlyDiscountAmount = isQuarterly ? regularBaseAmount * 0.10 : 0;
   
   const discountValue = Number(customDiscount) || 0;
   const finalAmount = totalBaseAmount + totalLateFee - quarterlyDiscountAmount - discountValue;
@@ -161,7 +163,7 @@ export function PaymentModal({
                         <span className="ml-2 text-xs text-orange-600">(+${c.calculatedLateFee} mora)</span>
                       )}
                     </label>
-                    {c.periodMonth === 0 && (
+                    {c.concept !== null && (
                       <Button
                         type="button"
                         variant="ghost"

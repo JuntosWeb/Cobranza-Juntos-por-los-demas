@@ -34,9 +34,23 @@ export async function createPatient(data: CreatePatientInput) {
     const settings = await prisma.systemSettings.findFirst();
     const inscriptionFee = settings?.inscriptionFee || 1700;
 
+    let newFolio = data.folio || undefined;
+    if (!newFolio) {
+      const lastPatient = await prisma.patient.findFirst({
+        where: { folio: { startsWith: 'PAC-' } },
+        orderBy: { createdAt: 'desc' },
+      });
+      let nextNumber = 1;
+      if (lastPatient && lastPatient.folio) {
+        const match = lastPatient.folio.match(/PAC-(\d+)/);
+        if (match) nextNumber = parseInt(match[1], 10) + 1;
+      }
+      newFolio = `PAC-${nextNumber.toString().padStart(4, '0')}`;
+    }
+
     const newPatient = await prisma.patient.create({
       data: {
-        folio: data.folio || undefined,
+        folio: newFolio,
         fullName: data.fullName,
         category: data.category,
         notes: data.notes,
@@ -116,12 +130,40 @@ export async function updatePatient(patientId: string, data: CreatePatientInput)
   }
 }
 
+export async function updatePatientStatus(patientId: string, status: PatientStatus, reason?: string) {
+  try {
+    await prisma.patient.update({
+      where: { id: patientId },
+      data: { status, suspensionReason: reason }
+    });
+    revalidatePath('/dashboard/pacientes');
+    revalidatePath('/dashboard/cobranza');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Error al cambiar estatus del paciente' };
+  }
+}
+
 export async function getPatientsWithPaymentStatus() {
   const patients = await prisma.patient.findMany({
     include: {
       services: { include: { service: true } },
       charges: {
-        where: { status: 'PENDING' },
+        where: {
+          OR: [
+            { status: 'PENDING' },
+            { 
+              periodMonth: new Date().getMonth() + 1,
+              periodYear: new Date().getFullYear(),
+              concept: null
+            }
+          ]
+        },
+        include: {
+          paymentAllocations: {
+            include: { payment: true }
+          }
+        },
         orderBy: { dueDate: 'asc' }
       }
     },
@@ -151,7 +193,7 @@ export async function getPatientsWithPaymentStatus() {
       }
     }
 
-    const pendingCharges = p.charges.map(c => {
+    const pendingCharges = p.charges.filter(c => c.status === 'PENDING').map(c => {
       let currentLateFee = c.lateFee;
 
       // Verificamos si la fecha límite de pago ha pasado para aplicar el recargo
@@ -173,6 +215,45 @@ export async function getPatientsWithPaymentStatus() {
     const frequency = p.services[0]?.frequency || 0;
     const scheduleType = p.services[0]?.scheduleType || 'N/A';
 
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    const currentMonthCharge = p.charges.find(c => c.periodMonth === currentMonth && c.periodYear === currentYear && c.concept === null);
+    
+    let paymentColor = 'gray';
+    
+    if (currentMonthCharge) {
+      if (currentMonthCharge.status === 'PAID' && currentMonthCharge.paymentAllocations.length > 0) {
+        const dates = currentMonthCharge.paymentAllocations.map(pa => pa.payment.paymentDate.getTime());
+        const maxDate = new Date(Math.max(...dates));
+        
+        if (maxDate.getMonth() + 1 < currentMonth || maxDate.getFullYear() < currentYear) {
+          paymentColor = 'green';
+        } else {
+          const day = maxDate.getDate();
+          if (day <= 7) paymentColor = 'yellow';
+          else if (day <= 14) paymentColor = 'pink';
+          else if (day <= 21) paymentColor = 'blue';
+          else paymentColor = 'purple';
+        }
+      } else if (currentMonthCharge.status === 'PENDING') {
+         const hasOldDebt = p.charges.some(c => c.status === 'PENDING' && (c.periodYear < currentYear || (c.periodYear === currentYear && c.periodMonth < currentMonth)));
+         if (hasOldDebt) {
+           paymentColor = 'orange';
+         } else {
+           paymentColor = 'red';
+         }
+      }
+    } else {
+      // Si no hay cargo del mes actual (aún no se genera), checamos si debe meses anteriores
+      const hasOldDebt = p.charges.some(c => c.status === 'PENDING' && (c.periodYear < currentYear || (c.periodYear === currentYear && c.periodMonth < currentMonth)));
+      if (hasOldDebt) {
+        paymentColor = 'orange';
+      } else {
+        // No tiene cargo actual y no debe nada anterior = Al corriente (verde)
+        paymentColor = 'green';
+      }
+    }
+
     return {
       id: p.id,
       folio: p.folio,
@@ -186,6 +267,7 @@ export async function getPatientsWithPaymentStatus() {
       hasLateFee,
       totalDebt,
       pendingCharges,
+      paymentColor,
       // TODO: aqui me falta checar si la transferencia ya paso o sigue pendiente, luego lo hago
       hasPendingTransfer: false 
     };
@@ -240,7 +322,7 @@ export async function createExtraordinaryCharge(patientId: string, concept: stri
     await prisma.charge.create({
       data: {
         patientId,
-        periodMonth: 0,
+        periodMonth: new Date().getMonth() + 1,
         periodYear: new Date().getFullYear(),
         concept,
         baseAmount: amount,

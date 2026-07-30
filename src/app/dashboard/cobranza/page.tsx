@@ -66,6 +66,7 @@ export default async function CobranzaPage() {
                     hasPendingTransfer={patient.hasPendingTransfer}
                     hasLateFee={patient.hasLateFee}
                     isSuspended={patient.status === 'SUSPENDED'}
+                    paymentColor={patient.paymentColor}
                   />
                 </TableCell>
                 <TableCell className="text-right flex items-center justify-end">

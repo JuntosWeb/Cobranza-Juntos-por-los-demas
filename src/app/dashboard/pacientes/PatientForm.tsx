@@ -111,8 +111,8 @@ export function PatientForm({ groupedServices, patientCategories = ['PARTICULAR'
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="folio">Folio / Expediente (Opcional)</Label>
-          <Input id="folio" value={folio} onChange={(e) => setFolio(e.target.value)} placeholder="Ej. F/1234" />
+          <Label htmlFor="folio">Folio / Expediente</Label>
+          <Input id="folio" value={folio || 'Autogenerado (PAC-XXXX)'} disabled className="bg-slate-50 text-slate-500" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Categoría</Label>

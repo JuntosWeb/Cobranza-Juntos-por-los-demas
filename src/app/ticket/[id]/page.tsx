@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PrintButton } from './PrintButton';
+import { EditableConcept } from './EditableConcept';
 
 export default async function TicketPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = await params;
@@ -93,9 +94,9 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         <div className="border-b pb-4 mb-4 border-slate-200 border-dashed text-sm">
           <p className="font-bold mb-2">Conceptos Pagados:</p>
           {payment.isQuickPayment ? (
-            <div className="flex justify-between">
-              <span>{payment.quickPaymentNotes || 'Caja Rápida / Valoración'}</span>
-              <span>${payment.totalBaseAmount.toFixed(2)}</span>
+            <div className="flex justify-between gap-4">
+              <EditableConcept initialValue={payment.quickPaymentNotes || 'Caja Rápida / Valoración'} />
+              <span className="shrink-0">${payment.totalBaseAmount.toFixed(2)}</span>
             </div>
           ) : (
             <div className="space-y-1">
@@ -103,13 +104,13 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
                 const isMonthly = !ca.charge.concept;
                 const periodStr = `Mes ${ca.charge.periodMonth}/${ca.charge.periodYear}`;
                 const therapies = payment.patient?.services.map(s => s.service?.name).filter(Boolean).join(' + ');
-                const conceptName = isMonthly ? (therapies ? `${periodStr} - ${therapies}` : periodStr) : ca.charge.concept;
+                const conceptName = isMonthly ? (therapies ? `${periodStr} - ${therapies}` : periodStr) : (ca.charge.concept || 'Cargo Extra');
                 
                 return (
                   <div key={ca.id} className="flex flex-col">
-                    <div className="flex justify-between">
-                      <span>{conceptName}</span>
-                      <span>${ca.charge.baseAmount.toFixed(2)}</span>
+                    <div className="flex justify-between gap-4">
+                      <EditableConcept initialValue={conceptName} />
+                      <span className="shrink-0">${ca.charge.baseAmount.toFixed(2)}</span>
                     </div>
                     {ca.charge.lateFee > 0 && (
                       <div className="flex justify-between text-slate-500 mt-1">
