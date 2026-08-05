@@ -104,7 +104,13 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
                 const isMonthly = !ca.charge.concept;
                 const periodStr = `Mes ${ca.charge.periodMonth}/${ca.charge.periodYear}`;
                 const therapies = payment.patient?.services.map(s => s.service?.name).filter(Boolean).join(' + ');
-                const conceptName = isMonthly ? (therapies ? `${periodStr} - ${therapies}` : periodStr) : (ca.charge.concept || 'Cargo Extra');
+                
+                let conceptName = '';
+                if (ca.ticketConcept) {
+                  conceptName = ca.ticketConcept;
+                } else {
+                  conceptName = isMonthly ? (therapies ? `${periodStr} - ${therapies}` : periodStr) : (ca.charge.concept || 'Cargo Extra');
+                }
                 
                 return (
                   <div key={ca.id} className="flex flex-col">

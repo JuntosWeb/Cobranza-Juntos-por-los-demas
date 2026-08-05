@@ -32,6 +32,7 @@ export function PaymentModal({
   recordedBy
 }: Props) {
   const [selectedChargeIds, setSelectedChargeIds] = useState<string[]>([]);
+  const [customConcepts, setCustomConcepts] = useState<Record<string, string>>({});
   const [customDiscount, setCustomDiscount] = useState<number | ''>('');
   const [customDiscountReason, setCustomDiscountReason] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH');
@@ -45,6 +46,10 @@ export function PaymentModal({
     } else {
       setSelectedChargeIds(prev => prev.filter(x => x !== id));
     }
+  };
+
+  const handleConceptChange = (id: string, value: string) => {
+    setCustomConcepts(prev => ({ ...prev, [id]: value }));
   };
 
   // Cálculos dinámicos
@@ -73,6 +78,11 @@ export function PaymentModal({
 
     setIsSubmitting(true);
 
+    const customConceptsArray = selectedChargeIds.map(id => ({
+      chargeId: id,
+      concept: customConcepts[id] || ''
+    })).filter(c => c.concept !== '');
+
     const res = await registerPayment({
       patientId,
       chargeIds: selectedChargeIds,
@@ -84,12 +94,14 @@ export function PaymentModal({
       finalAmountPaid: Math.max(finalAmount, 0),
       paymentMethod,
       recordedBy,
+      customConcepts: customConceptsArray
     });
 
     setIsSubmitting(false);
     if (res.success && res.payment) {
       setSuccessPaymentId(res.payment.id);
       setSelectedChargeIds([]);
+      setCustomConcepts({});
       setCustomDiscount('');
     } else {
       alert(res.error || 'Ocurrió un error');
@@ -145,39 +157,54 @@ export function PaymentModal({
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="space-y-3">
             <Label>Cargos Pendientes (Estado de Cuenta)</Label>
-            <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+            <div className="border rounded-md p-3 max-h-[300px] overflow-y-auto space-y-3">
               {pendingCharges.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center">No hay adeudos.</p>
               ) : (
-                pendingCharges.map(c => (
-                  <div key={c.id} className="flex items-center space-x-3">
-                    <Checkbox 
-                      id={`charge-${c.id}`}
-                      checked={selectedChargeIds.includes(c.id)}
-                      onCheckedChange={(checked) => handleToggleCharge(c.id, checked as boolean)}
-                    />
-                    <label htmlFor={`charge-${c.id}`} className="text-sm flex-1 cursor-pointer">
-                      Mes {c.periodMonth}/{c.periodYear} 
-                      <span className="ml-2 font-semibold">${c.baseAmount}</span>
-                      {c.calculatedLateFee > 0 && (
-                        <span className="ml-2 text-xs text-orange-600">(+${c.calculatedLateFee} mora)</span>
+                pendingCharges.map(c => {
+                  const isChecked = selectedChargeIds.includes(c.id);
+                  const defaultConceptName = !c.concept ? `Mes ${c.periodMonth}/${c.periodYear}` : (c.concept || 'Cargo Extra');
+                  return (
+                  <div key={c.id} className="flex flex-col space-y-2 border-b border-slate-100 last:border-0 pb-2">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id={`charge-${c.id}`}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => handleToggleCharge(c.id, checked as boolean)}
+                      />
+                      <label htmlFor={`charge-${c.id}`} className="text-sm flex-1 cursor-pointer">
+                        Mes {c.periodMonth}/{c.periodYear} 
+                        <span className="ml-2 font-semibold">${c.baseAmount}</span>
+                        {c.calculatedLateFee > 0 && (
+                          <span className="ml-2 text-xs text-orange-600">(+${c.calculatedLateFee} mora)</span>
+                        )}
+                      </label>
+                      {c.concept !== null && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                          onClick={() => handleCancelCharge(c.id)}
+                          disabled={cancellingChargeId === c.id}
+                          title="Eliminar cargo extra"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       )}
-                    </label>
-                    {c.concept !== null && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
-                        onClick={() => handleCancelCharge(c.id)}
-                        disabled={cancellingChargeId === c.id}
-                        title="Eliminar cargo extra"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    </div>
+                    {isChecked && (
+                      <div className="pl-7 pr-2">
+                         <Input 
+                           placeholder="Concepto en recibo (opcional)" 
+                           className="h-7 text-xs" 
+                           value={customConcepts[c.id] !== undefined ? customConcepts[c.id] : defaultConceptName}
+                           onChange={(e) => handleConceptChange(c.id, e.target.value)}
+                         />
+                      </div>
                     )}
                   </div>
-                ))
+                )})
               )}
             </div>
           </div>

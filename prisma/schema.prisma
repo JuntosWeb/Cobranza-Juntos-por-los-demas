@@ -182,6 +182,7 @@ model PaymentCharge {
   chargeId         String
   charge           Charge   @relation(fields: [chargeId], references: [id], onDelete: Cascade)
   amountAllocated  Float    // de cuanto fue a este cargo
+  ticketConcept    String?  // guarda el nombre editado para imprimir en el recibo
   createdAt        DateTime @default(now())
 }
 

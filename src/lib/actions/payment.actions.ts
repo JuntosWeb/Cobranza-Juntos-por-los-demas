@@ -20,6 +20,7 @@ type RegisterPaymentInput = {
   isQuickPayment?: boolean;
   quickPaymentName?: string;
   quickPaymentNotes?: string;
+  customConcepts?: { chargeId: string, concept: string }[];
 };
 
 export async function registerPayment(data: RegisterPaymentInput) {
@@ -109,11 +110,14 @@ export async function registerPayment(data: RegisterPaymentInput) {
           where: { id: chargeId }
         });
 
+        const customConcept = data.customConcepts?.find(c => c.chargeId === chargeId)?.concept;
+
         await tx.paymentCharge.create({
           data: {
             paymentId: payment.id,
             chargeId: charge.id,
-            amountAllocated: charge.baseAmount + charge.lateFee
+            amountAllocated: charge.baseAmount + charge.lateFee,
+            ticketConcept: customConcept || null
           }
         });
       }
