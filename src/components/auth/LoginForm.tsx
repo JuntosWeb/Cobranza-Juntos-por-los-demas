@@ -52,7 +52,7 @@ export function LoginForm() {
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="admin"
+            placeholder="usuario"
           />
         </div>
       </div>
@@ -67,7 +67,7 @@ export function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="admin123"
+            placeholder="********"
           />
         </div>
       </div>
@@ -76,12 +76,6 @@ export function LoginForm() {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Iniciando...' : 'Iniciar Sesión'}
         </Button>
-      </div>
-      
-      <div className="mt-4 text-xs text-center text-slate-500 space-y-1">
-        <p>Mock users para el MVP:</p>
-        <p>Admin: admin / admin123</p>
-        <p>Staff: staff / staff123</p>
       </div>
     </form>
   );
